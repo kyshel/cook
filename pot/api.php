@@ -2,18 +2,20 @@
 require_once('load.php');
 header('Content-Type: application/json');
 
-echo '<h1>'.ABSPATH.'</h1>';
+$config_data = array();
+$config_data['ABSPATH'] = ABSPATH;
+$config_data['REQUEST_METHOD'] = $_SERVER['REQUEST_METHOD'];
+$config_data['PATH_INFO'] = $_SERVER['PATH_INFO'];
+
 
 //echo '<meta charset="utf-8">'; 
+//check $_SERVER['PATH_INFO'] not too long, incase regex crash
+//pre_dump($_SERVER);
+pre_dump($config_data);
+echo "\n\n";
 
-//check $_SERVER['PATH_INFO'] not too long
-
-echo '--- REQUEST_METHOD & PATH_INFO<br>';
-echo $_SERVER['REQUEST_METHOD'].' &nbsp; '.$_SERVER['PATH_INFO'];
-echo '<br>---<br>';
-
-
-router($_SERVER['PATH_INFO']);
+$data = router($_SERVER['PATH_INFO']);
+echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 
 
@@ -24,7 +26,7 @@ router($_SERVER['PATH_INFO']);
 
 
 // get the HTTP method, path and body of the request
-$method = $_SERVER['REQUEST_METHOD'];
+//$method = $_SERVER['REQUEST_METHOD'];
 
 
 // $input = json_decode(file_get_contents('php://input'),true);

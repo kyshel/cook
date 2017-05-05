@@ -1,7 +1,8 @@
 fridge/*
 plate/*
-ignite/bin/*
+ignite/cmake/*
 
 !fridge/README.md
 !plate/README.md
-!/bin/README.md
+!ignite/README.md
+

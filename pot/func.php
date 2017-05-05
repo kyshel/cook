@@ -3,52 +3,60 @@
 // redirect accorfing patj_info
 function router($path_info){
 	$url_map = array(
-		'/^\/pattern/' => 'process',
-		'/^\/list_patterns$/' => 'list_patterns',
+		'/^\/trick/' => 'process',
+		'/^\/list$/' => 'api_list_valid_tricks',
 		'/^\/?$/' => 'api_index',
 		);
 
 	foreach ($url_map as $regex_pattern => $function_name) {
-		if (url_to_function($regex_pattern,$function_name,$path_info) === true) {
-			return true;
+		if (preg_match($regex_pattern,$path_info) === 1){
+			$url_chopped = preg_replace($regex_pattern, '', $path_info);
+			return call_user_func($function_name, $url_chopped);
 		}
 	}
 
-	api_404();
+	return api_404();
 }
 
 
 
+function process($url_chopped){
+	echo $url_chopped;
+	echo "\n\n";
 
-function url_to_function($regex_pattern,$function_name,$path_info){
-	if (preg_match($regex_pattern,$path_info) === 1) {
-		$url_chopped = preg_replace($regex_pattern, '', $path_info);
-		call_user_func($function_name, $url_chopped);
-		return true;
-	}else{
-		return false;
+	$trick = trim($url_chopped, " /");
+	//echo $trick."\n\n";
+
+	
+
+	return $url_chopped; 
+}
+
+function api_list_valid_tricks(){
+	$dir_bin=ABSPATH."ignite/cmake/bin/";
+	$files = array_diff(scandir($dir_bin), array('..', '.'));
+	//pre_dump($files);
+	$tricks=array();
+	foreach ($files as $key => $trick_name) {
+		array_push($tricks, $trick_name);
 	}
-
-}
-
-function process($pattern){
-	echo $pattern;
-}
-
-function list_patterns($pattern){
-	echo 'this is list_patterns';
+	return $tricks;
 }
 
 function api_index(){
-	$data = array('message' => 'this is cook api', );
-	echo json_encode($data);
+	$data = array('message' => 'this is cook api index', );
+	return $data;
 }
 
 function api_404(){
 	$data = array(
 		'message' => 'Not found',
 		 );
-	echo json_encode($data);
+	return $data;
+}
+
+function pre_dump($var){
+	echo '<pre>'.var_export($var,true).'</pre>';
 }
 
 
