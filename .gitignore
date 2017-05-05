@@ -1,0 +1,7 @@
+fridge/*
+plate/*
+ignite/bin/*
+
+!fridge/README.md
+!plate/README.md
+!/bin/README.md
