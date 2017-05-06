@@ -3,3 +3,4 @@
 - add parameter check
 - add tricks 404
 - IE >= 10
+- ? progress-bar like github
