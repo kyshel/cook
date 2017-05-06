@@ -12,6 +12,7 @@ Deploy from a minimal CentOS7 installation
 1. `cd /var/www/html && git clone https://github.com/kyshel/cook.git`
 1. `cd cook && chown apache:apache fridge/ plate/ `
 1. `./install.sh`
+1. All done! input `your.server.address/cook` in browser, enjoy ~
 
 ## Credit
 Made with ❤ by [kyshel](http://github.com/kyshel)  
