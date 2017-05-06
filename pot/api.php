@@ -14,7 +14,7 @@ $config_data['PATH_INFO'] = $_SERVER['PATH_INFO'];
 pre_dump($config_data);
 echo "\n\n";
 
-$data = router($_SERVER['PATH_INFO']);
+$data = router($_SERVER['REQUEST_METHOD'],$_SERVER['PATH_INFO']);
 echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
 
