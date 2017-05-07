@@ -8,6 +8,7 @@ function router($request_method,$path_info){
 		'/^\/?$/' => 'api_index',
 
 		'/^\/deposit/' => 'api_deposit', // reponse a cooklie 
+		'/^\/deposited/' => 'api_deposited', // reponse a cooklie 
 
 		);
 
@@ -25,7 +26,7 @@ function api_deposit(){
 	$input=get_input();
 	$_SESSION['cook_origin_name'] = $input['origin_name'];
 	$_SESSION['cook_unique_name'] = $input['unique_name'];
-	$message = "OK";
+	$message = "deposit OK";
 	$response=array(
 		'message'=> $message,
 		'origin_name' => $_SESSION['cook_origin_name'],
@@ -83,25 +84,28 @@ function get_input(){
 		return 'error';
 	}
 
-	$origin_name_parts = pathinfo($array_input['name']);
+	$origin_name_parts = pathinfo($array_input['origin_name']);
 	$origin_name_a = $origin_name_parts['filename'];
 	$origin_name_b = $origin_name_parts['extension'];
 
 	if (isset($array_input['unique_name'])) {
+		$unique_name = $array_input['unique_name'];
 		$unique_name_parts = pathinfo($array_input['unique_name']);
-		$unique_name_a = $unique_name['filename'];
-		$unique_name_b = $unique_name['extension'];
+		$unique_name_a = $unique_name_parts['filename'];
+		$unique_name_b = $unique_name_parts['extension'];
 	}else{
 		$unique_name_a = get_unique_name();
 		$unique_name_b = $origin_name_parts['extension'];
 		$unique_name = $unique_name_a.'.'.$unique_name_b;
 		base64_to_jpeg($array_input['content'], ABSPATH.'fridge/'.$unique_name);
+		// (refactor) if last code write ok, then 
+		http_response_code(201);
 	}
 
 	$argv_3=isset($array_input['argv_3'])?$array_input['argv_3']:'';
 
 	$stored_input=array(
-		'origin_name' => $array_input['name'] , 
+		'origin_name' => $array_input['origin_name'] , 
 		'origin_name_a' => $origin_name_a , 
 		'origin_name_b' => $origin_name_b , 
 
@@ -149,7 +153,15 @@ function api_list_valid_tricks(){
 }
 
 function api_index(){
-	$data = array('message' => 'this is cook api index', );
+	$valid_api =  array(
+		'/tricks' => 'list all tricks', 
+		'/tricks/:trick' => 'ignite image by the trick', 
+		'/deposit' => 'deposit image to fridge & stored in SESSION, for future use', 
+		);
+	$data = array(
+		'message' => 'this is cook api index', 
+		'valid_api' => $valid_api,
+		);
 	return $data;
 }
 

@@ -4,3 +4,4 @@
 - add tricks 404
 - IE >= 10
 - ? progress-bar like github
+- need cookie support

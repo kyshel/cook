@@ -11,8 +11,11 @@ $config_data['PATH_INFO'] = $_SERVER['PATH_INFO'];
 //echo '<meta charset="utf-8">'; 
 //check $_SERVER['PATH_INFO'] not too long, incase regex crash
 //pre_dump($_SERVER);
-pre_dump($config_data);
-echo "\n\n";
+if ($_GET['d'] == '1') {
+	pre_dump($config_data);
+	echo "\n\n";
+}
+
 
 $data = router($_SERVER['REQUEST_METHOD'],$_SERVER['PATH_INFO']);
 echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

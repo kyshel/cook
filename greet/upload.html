@@ -46,8 +46,11 @@
 	<img id="img" height="150">
 
 	<img id="server_image" height="150">
+<div id="tricks"></div>
 	<div id="show"></div>
+
 	<button id="btn">gray</button>
+
 	<button id="loader-switch">loader_switch</button>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -56,9 +59,6 @@
 		var API_PATH = "../chef/api.php";
 
 		document.getElementById("inp").addEventListener("change", readFile);
-
-
-
 
 		function readFile() {		
 			var file_input = document.getElementById("inp")
@@ -72,7 +72,7 @@
 
 					showLoader('Loaded image, uploading ...');
 					var image = {
-						"name": file_input.files[0].name,
+						"origin_name": file_input.files[0].name,
 						"content":e.target.result
 					};
 					deposit(image);
@@ -107,23 +107,81 @@
 			$.ajax({
 				url: path,
 				type: 'PUT',
+				dataType: "json",
+				data: JSON.stringify(image),
+			}).success( function(response,status,xhr) {
+				hideLoader();
+
+				if (xhr.status == 201) {
+					console.log(response.unique_name)
+					createCookie('unique_name',response.unique_name,1);
+					createCookie('origin_name',image.origin_name,1);
+				}else{
+					console.log('deposit status not 201');
+				}
+
+			}).error( function(e) {
+				console.log('deposit error:');
+				console.log(e);
+			});
+		}
+
+
+		function showTricks(){
+			path = API_PATH + "/tricks"
+			$.ajax({
+				url: path,
+				type: 'GET',
+				dataType: "json",
+				//data: JSON.stringify(),
+			}).success( function(response,status,xhr) {
+				if (xhr.status == 200) {
+					showButtons(response);				
+				}else{
+					console.log('showTricks error occured')
+				}
+			}).error( function(e) {
+				console.log('showTricks error occured:');
+				console.log(e);
+			});
+		}
+
+		function showButtons(tricks){
+			buttons = 'tricks: ';
+			for (var i = 0, len = tricks.length; i < len; i++) {
+				buttons += '<button onclick="wish(this.textContent)">'+ tricks[i] +'</button> ';
+			}
+
+			$('#tricks').html(buttons);
+
+		}
+
+		// wish to deposited image
+		function wish(trick) {
+			image = {
+				"unique_name" : readCookie('unique_name'),
+				"origin_name" : readCookie('origin_name')
+			}
+
+			var path = API_PATH + "/tricks/" + trick
+
+			$.ajax({
+				url: path,
+				type: 'PUT',
 				dataType: "html",
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
-				console.log('xhr');
-				console.log(xhr);
-				console.log('response');
-				console.log(response);
-
-				console.log('deposit finish')
-				hideLoader();
-
+				// console.log('xhr');
+				// console.log(xhr);
+				// console.log('response');
+				// console.log(response);
+				//status_code=xhr.status;
+				//status_text=xhr.statusText;
 				if (status_code = 201) {
 					
 				}else{
 					alert('Error occured!');
 				}
-
 			}).error( function(e) {
 				console.log('e');
 				console.log(e);
@@ -132,8 +190,10 @@
 
 
 
+		// order, with image and trick
 		function order(image,trick) {
-			//console.log(image)
+			console.log(image,trick)
+
 			var path = API_PATH + "/tricks/" + trick
 
 			$.ajax({
@@ -181,8 +241,7 @@
 		}
 
 		$('#loader-switch').click(function(e) {
-			$('#loader').removeClass('is-quiet');
-			$('#loader').addClass('is-active');
+			showTricks()
 		});
 
 		$('#btn').click(function(e) {
@@ -192,6 +251,31 @@
 			};
 			order(image,'gray');
 		});
+
+		function createCookie(name,value,days) {
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime()+(days*24*60*60*1000));
+				var expires = "; expires="+date.toGMTString();
+			}
+			else var expires = "";
+			document.cookie = name+"="+value+expires+"; path=/";
+		}
+
+		function readCookie(name) {
+			var nameEQ = name + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0;i < ca.length;i++) {
+				var c = ca[i];
+				while (c.charAt(0)==' ') c = c.substring(1,c.length);
+				if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+			}
+			return null;
+		}
+
+		function eraseCookie(name) {
+			createCookie(name,"",-1);
+		}
 
 
 
