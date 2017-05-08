@@ -32,9 +32,8 @@
 	
 </head>
 <body>
-
-
-	<input id="inp" type='file'>
+	<div id="bs64"></div>
+<!-- 	<button id="test">test</button><br><br><br> -->
 
 	<div id="loader" class="is-quiet">
 		<br>
@@ -42,21 +41,20 @@
 		<span id="loader-text">lala</span>
 	</div>
 
-	<div id="bs64"></div>
+	<div><input id="inp" type='file'></div>
 	<img id="img" height="150">
-
 	<img id="server_image" height="150">
-<div id="tricks"></div>
-	<div id="show"></div>
 
-	<button id="btn">gray</button>
+	<div id="tricks"></div>
+	<div id="plate"></div>
 
-	<button id="loader-switch">loader_switch</button>
 
+	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script type="text/javascript">
 
 		var API_PATH = "../chef/api.php";
+		var PLATE_PATH = "../plate";
 
 		document.getElementById("inp").addEventListener("change", readFile);
 
@@ -116,6 +114,8 @@
 					console.log(response.unique_name)
 					createCookie('unique_name',response.unique_name,1);
 					createCookie('origin_name',image.origin_name,1);
+					showLoader('Loading valid tricks from server ...');
+					showTricks();
 				}else{
 					console.log('deposit status not 201');
 				}
@@ -136,7 +136,8 @@
 				//data: JSON.stringify(),
 			}).success( function(response,status,xhr) {
 				if (xhr.status == 200) {
-					showButtons(response);				
+					showButtons(response);	
+					hideLoader();			
 				}else{
 					console.log('showTricks error occured')
 				}
@@ -149,7 +150,7 @@
 		function showButtons(tricks){
 			buttons = 'tricks: ';
 			for (var i = 0, len = tricks.length; i < len; i++) {
-				buttons += '<button onclick="wish(this.textContent)">'+ tricks[i] +'</button> ';
+				buttons += '<button onclick="wish(this.textContent)" class="trick_button">'+ tricks[i] +'</button> ';
 			}
 
 			$('#tricks').html(buttons);
@@ -168,22 +169,16 @@
 			$.ajax({
 				url: path,
 				type: 'PUT',
-				dataType: "html",
+				dataType: "json",
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
-				// console.log('xhr');
-				// console.log(xhr);
-				// console.log('response');
-				// console.log(response);
-				//status_code=xhr.status;
-				//status_text=xhr.statusText;
-				if (status_code = 201) {
-					
+				if (xhr.status == 201) {
+					onPlate(response.image.tricked_name); 
 				}else{
-					alert('Error occured!');
+					console.log('wish() status code wrong!');
 				}
 			}).error( function(e) {
-				console.log('e');
+				console.log('wish() eroor occured');
 				console.log(e);
 			});
 		}
@@ -199,7 +194,7 @@
 			$.ajax({
 				url: path,
 				type: 'PUT',
-				dataType: "html",
+				dataType: "json",
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
 				console.log('xhr');
@@ -219,7 +214,10 @@
 			});
 		}
 
-
+		function onPlate($name_tricked){
+			$image_tricked = '<img id="img" height="150" src="'+ PLATE_PATH +'/' +$name_tricked +'">';
+			$('#plate').html($image_tricked);
+		}
 
 
 		function getFile(){
@@ -229,6 +227,7 @@
 			} 
 			return files[0];
 		}
+
 
 		function showLoader($text){
 			$('#loader-text').html($text);
@@ -240,17 +239,6 @@
 			$('#loader').addClass('is-quiet');
 		}
 
-		$('#loader-switch').click(function(e) {
-			showTricks()
-		});
-
-		$('#btn').click(function(e) {
-			var image = {
-				"name": getFile().name,
-				"content":document.getElementById("img").src
-			};
-			order(image,'gray');
-		});
 
 		function createCookie(name,value,days) {
 			if (days) {

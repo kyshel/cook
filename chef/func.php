@@ -40,7 +40,7 @@ function process($url_chopped){
 	$trick = trim($url_chopped, " /");
 	//http_response_code(201);
 	$input=get_input(); 
-	pre_dump($input);
+	//pre_dump($input);
 
 	$src_image=$input['unique_name']; // hash
 	$dst_image=$input['unique_name_a'].'_'.$trick.'.'.$input['unique_name_b']; // hash
@@ -51,7 +51,7 @@ function process($url_chopped){
 	$argv_3 = $input['argv_3'];
 
 	$command = $argv_0.' '.$argv_1.' '.$argv_2.' '.$argv_3;
-	echo $command . "\n";
+	//echo $command . "\n";
 
 
 	$command_escaped = escapeshellcmd($command);
@@ -63,12 +63,18 @@ function process($url_chopped){
 		2.there is no same name file that's not apache own";
 	}else if($output == 'OK'){
 		$message = $trick.' success';
+		http_response_code(201);
 	}else{
 		$message = $output;
 	}
 
 	$data = array();
 	$data['message'] = $message;
+	$data['image'] =  array(
+		'origin_name' => $input['origin_name'], 
+		'unique_name' => $src_image, 
+		'tricked_name' => $dst_image, 
+		);
 
 	return $data; 
 }
