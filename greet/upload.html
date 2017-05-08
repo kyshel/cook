@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -15,7 +13,7 @@
 
 		.loader-spinner {
 			border: 5px solid #f3f3f3; /* Light grey */
-			border-top: 5px solid #555; /* Blue */
+			border-top: 5px solid #555; /* grey */
 			border-radius: 50%;
 			width: 20px;
 			height: 20px;
@@ -46,7 +44,9 @@
 	<img id="server_image" height="150">
 
 	<div id="tricks"></div>
-	<div id="plate"></div>
+	<div id="plate">
+		<img id="image_tricked" height="150">
+	</div>
 
 
 	
@@ -66,8 +66,6 @@
 				FR.addEventListener("load", function(e) {
 					document.getElementById("img").src       = e.target.result;
 					//document.getElementById("bs64").innerHTML= e.target.result;
-					console.log('display finish')
-
 					showLoader('Loaded image, uploading ...');
 					var image = {
 						"origin_name": file_input.files[0].name,
@@ -78,6 +76,7 @@
 				FR.readAsDataURL(file_input.files[0]);
 
 				FR.onloadstart = function(e){
+					//$('#plate').html('<img id="image_tricked" height="150">');
 					showLoader('Loading image...');
 				};
 				FR.onloadend = function(e){
@@ -89,12 +88,14 @@
 					// };
 					// showLoader('Loaded image, uploading ...');
 					// deposit(image);
-					
-					
+					 						
 				};
 
 			}
 		}
+
+		
+
 
 
 
@@ -111,11 +112,13 @@
 				hideLoader();
 
 				if (xhr.status == 201) {
-					console.log(response.unique_name)
+					//console.log(response.unique_name)
 					createCookie('unique_name',response.unique_name,1);
 					createCookie('origin_name',image.origin_name,1);
+
 					showLoader('Loading valid tricks from server ...');
 					showTricks();
+					
 				}else{
 					console.log('deposit status not 201');
 				}
@@ -150,15 +153,24 @@
 		function showButtons(tricks){
 			buttons = 'tricks: ';
 			for (var i = 0, len = tricks.length; i < len; i++) {
-				buttons += '<button onclick="wish(this.textContent)" class="trick_button">'+ tricks[i] +'</button> ';
+				buttons += '<button  class="trick_button">'+ tricks[i] +'</button> ';
 			}
 
 			$('#tricks').html(buttons);
+			$('.trick_button').on('click',function() {
+				$(".trick_button").prop("disabled", true);
+				wish(this.textContent)
+			});
 
 		}
 
+
+
+
 		// wish to deposited image
 		function wish(trick) {
+			
+			showLoader('Processing...');
 			image = {
 				"unique_name" : readCookie('unique_name'),
 				"origin_name" : readCookie('origin_name')
@@ -174,6 +186,7 @@
 			}).success( function(response,status,xhr) {
 				if (xhr.status == 201) {
 					onPlate(response.image.tricked_name); 
+					
 				}else{
 					console.log('wish() status code wrong!');
 				}
@@ -215,9 +228,29 @@
 		}
 
 		function onPlate($name_tricked){
-			$image_tricked = '<img id="img" height="150" src="'+ PLATE_PATH +'/' +$name_tricked +'">';
-			$('#plate').html($image_tricked);
+			showLoader('Downloading processed image...');
+
+			path_tricked= PLATE_PATH +'/' +$name_tricked +'?time='+ new Date().getTime() 
+			
+
+			//image = $(new Image()).attr('height', '150')
+
+
+			$('#image_tricked').on('load', function(){
+				console.log('wowowo');
+				hideLoader();
+				$(".trick_button").prop("disabled", false);
+			});
+
+			var image_tricked = document.getElementById('image_tricked')
+			image_tricked.src = path_tricked
+
+
+
+
 		}
+
+
 
 
 		function getFile(){

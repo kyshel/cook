@@ -126,7 +126,8 @@ function get_input(){
 }
 
 function get_unique_name(){
-	return 'unique_aaa';
+
+	return uniqid().'_'.rand();
 }
 
 
