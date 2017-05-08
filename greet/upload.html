@@ -31,7 +31,6 @@
 </head>
 <body>
 	<div id="bs64"></div>
-<!-- 	<button id="test">test</button><br><br><br> -->
 
 	<div id="loader" class="is-quiet">
 		<br>
@@ -76,31 +75,14 @@
 				FR.readAsDataURL(file_input.files[0]);
 
 				FR.onloadstart = function(e){
-					//$('#plate').html('<img id="image_tricked" height="150">');
+					$('#plate').html('<img id="image_tricked" height="150">');
 					showLoader('Loading image...');
 				};
-				FR.onloadend = function(e){
-					// hideLoader();
-
-					// var image = {
-					// 	"name": getFile().name,
-					// 	"content":document.getElementById("img").src 
-					// };
-					// showLoader('Loaded image, uploading ...');
-					// deposit(image);
-					 						
-				};
-
 			}
 		}
 
-		
-
-
-
 
 		function deposit(image) {
-			//console.log(image)
 			var path = API_PATH + "/deposit"
 
 			$.ajax({
@@ -112,9 +94,11 @@
 				hideLoader();
 
 				if (xhr.status == 201) {
-					//console.log(response.unique_name)
-					createCookie('unique_name',response.unique_name,1);
+					eraseCookie('origin_name');
+					eraseCookie('unique_name');
+
 					createCookie('origin_name',image.origin_name,1);
+					createCookie('unique_name',response.unique_name,1);
 
 					showLoader('Loading valid tricks from server ...');
 					showTricks();
@@ -136,16 +120,15 @@
 				url: path,
 				type: 'GET',
 				dataType: "json",
-				//data: JSON.stringify(),
 			}).success( function(response,status,xhr) {
 				if (xhr.status == 200) {
 					showButtons(response);	
 					hideLoader();			
 				}else{
-					console.log('showTricks error occured')
+					console.log('showTricks() error occured')
 				}
 			}).error( function(e) {
-				console.log('showTricks error occured:');
+				console.log('showTricks() error occured:');
 				console.log(e);
 			});
 		}
@@ -161,15 +144,13 @@
 				$(".trick_button").prop("disabled", true);
 				wish(this.textContent)
 			});
-
 		}
 
 
 
 
 		// wish to deposited image
-		function wish(trick) {
-			
+		function wish(trick) {		
 			showLoader('Processing...');
 			image = {
 				"unique_name" : readCookie('unique_name'),
@@ -185,8 +166,7 @@
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
 				if (xhr.status == 201) {
-					onPlate(response.image.tricked_name); 
-					
+					onPlate(response.image.tricked_name); 				
 				}else{
 					console.log('wish() status code wrong!');
 				}
@@ -210,19 +190,14 @@
 				dataType: "json",
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
-				console.log('xhr');
-				console.log(xhr);
-				console.log('response');
-				console.log(response);
-				//status_code=xhr.status;
-				//status_text=xhr.statusText;
-				if (status_code = 201) {
-					
+				if (xhr.status = 201) {
+					console.log('order() ok');
+					console.log('response');
 				}else{
-					alert('Error occured!');
+					alert('order() status not 201');
 				}
 			}).error( function(e) {
-				console.log('e');
+				console.log('order() error occured!');
 				console.log(e);
 			});
 		}
@@ -232,21 +207,13 @@
 
 			path_tricked= PLATE_PATH +'/' +$name_tricked +'?time='+ new Date().getTime() 
 			
-
-			//image = $(new Image()).attr('height', '150')
-
-
 			$('#image_tricked').on('load', function(){
-				console.log('wowowo');
 				hideLoader();
 				$(".trick_button").prop("disabled", false);
 			});
 
 			var image_tricked = document.getElementById('image_tricked')
 			image_tricked.src = path_tricked
-
-
-
 
 		}
 
@@ -298,11 +265,6 @@
 			createCookie(name,"",-1);
 		}
 
-
-
 	</script>
-
-
-
 </body>
 </html>
