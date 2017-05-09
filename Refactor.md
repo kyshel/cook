@@ -9,3 +9,8 @@
 170508
 
 - is_cached(tricked_image)
+- change load to load_end
+
+170509
+
+- no-en support
