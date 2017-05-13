@@ -5,10 +5,28 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
 
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" >
+	
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.min.css" >
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.skinNice.min.css" >
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/js/ion.rangeSlider.min.js"></script>
+
+
 	
 </head>
 <body>
-	<div id="bs64"></div>
 
 	<div id="loader" class="is-quiet">
 		<br>
@@ -16,28 +34,58 @@
 		<span id="loader-text"></span>
 	</div>
 
-	<div><input id="inp" type='file'></div>
+	<div id="wrapper_newfile">
+		<input id="inp" type='file'>
+	</div><br>
 
-	<div style="/*width:200px;height:200px;*/">
-		<img id="img" height="150">
-	</div>
+	<div id="wrapper_tricks">
+		<div id="tricks"></div>
+	</div><br>
+
+	<div id="wrapper_image">
+		<img id="img" height="250">
+	</div><br>
 	
-	<img id="server_image" height="150">
+	
+
 
 	<button id="test">test</button>
-	<div id="tricks"></div>
-	<div id="plate">
-		<img id="image_tricked" height="150">
+
+	<input type="text" id="example_id" name="example_name" value="" />
+
+	<div class="btn-group" role="group" aria-label="...">
+		<button type="button" class="btn btn-default">U</button>
+		<button type="button" class="btn btn-default">R</button>
+
+		<div class="btn-group" role="group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Basic
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="#">resize</a></li>
+				<li><a href="#">Dropdown link</a></li>
+			</ul>
+		</div>
+
+		<div class="btn-group" role="group">
+			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Effect
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				<li><a href="#">Dropdown link</a></li>
+				<li><a href="#">Dropdown link</a></li>
+			</ul>
+		</div>
+
 	</div>
+	
+
 
 
 	
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
-
+	
 	
 	
 	<script type="text/javascript">
@@ -52,11 +100,15 @@
 			showTricks();
 		}
 
-		$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
-
-		$('.test').on('click',function() {
-			$.Jcrop('#img').destroy();
+		//$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
+		$("#example_id").ionRangeSlider({
+			min: 1,
+			max: 200,
+			from: 100,
+			postfix: "%"
 		});
+
+
 			
 
 
@@ -69,7 +121,7 @@
 				var content = '';
 				FR.addEventListener("load", function(e) {
 					document.getElementById("img").src       = e.target.result;
-					//document.getElementById("bs64").innerHTML= e.target.result;
+	
 					showLoader('Loaded image, uploading ...');
 					var image = {
 						"origin_name": file_input.files[0].name,
@@ -80,7 +132,7 @@
 				FR.readAsDataURL(file_input.files[0]);
 
 				FR.onloadstart = function(e){
-					$('#plate').html('<img id="image_tricked" height="150">');
+					$('#plate').html('<img id="img" height="150">');
 					showLoader('Loading image...');
 				};
 			}
@@ -142,6 +194,56 @@
 
 		function showButtons(tricks){
 			buttons = 'tricks: ';
+
+			$.getJSON("tricks.json?"+ new Date().getTime(), function(data) {
+			console.log(data); 
+
+			// make hash table
+			var group_name,
+			group,
+			i,
+			hash_table={};
+
+			for(group_name in data.tricks_classify){
+				group = data.tricks_classify[group_name];
+				for( i in group){
+					console.log(group[i]); 
+					console.log(group_name); 
+					hash_table[group[i]] = group_name;
+				}
+			}
+
+			console.log(hash_table); 
+
+			// for (var i = data['tricks_reclassify'].length - 1; i >= 0; i--) {
+			// 	console.log(data[i]); 
+			// }
+
+			
+
+			// filter_object=data.filter[op];
+
+			// if (filter_object.hasOwnProperty("argv_type")) {
+			// 	if (filter_object.argv_type == 'slide') {
+			// 		var argv_split=filter_object.argv_range.split(' ');
+			// 		show_argv_control(op,argv_split,filter_object.argv_name)
+			// 	}else if(filter_object.argv_type == 'resize'){
+			// 		show_argv_control_resize(op,filter_object)
+			// 	}else if(filter_object.argv_type == 'button'){
+			// 		show_argv_control_button(op,filter_object)
+			// 	}
+			// }else{
+			// 	$('#argv_control').html(capitalizeFirstLetter(op) + ' result:');
+			// 	send_ajax(op);
+			// }
+
+
+
+		});
+
+
+
+
 			for (var i = 0, len = tricks.length; i < len; i++) {
 				buttons += '<button  class="trick_button">'+ tricks[i] +'</button> ';
 			}
@@ -159,12 +261,15 @@
 		// wish to deposited image
 		function wish(trick) {		
 			showLoader('Processing...');
+			var path = API_PATH + "/tricks/" + trick
+
+
 			image = {
-				"unique_name" : readCookie('unique_name'),
-				"origin_name" : readCookie('origin_name')
+					"unique_name" : readCookie('unique_name'),
+					"origin_name" : readCookie('origin_name')
 			}
 
-			var path = API_PATH + "/tricks/" + trick
+
 
 			$.ajax({
 				url: path,
@@ -182,6 +287,27 @@
 				console.log(e);
 			});
 		}
+
+
+		// apply button
+		function sendWish(path,image){
+			$.ajax({
+				url: path,
+				type: 'PUT',
+				dataType: "json",
+				data: JSON.stringify(image),
+			}).success( function(response,status,xhr) {
+				if (xhr.status == 201) {
+					onPlate(response.image.tricked_name); 				
+				}else{
+					console.log('wish() status code wrong!');
+				}
+			}).error( function(e) {
+				console.log('wish() eroor occured');
+				console.log(e);
+			});
+		}
+
 
 
 
@@ -214,13 +340,13 @@
 
 			path_tricked= PLATE_PATH +'/' +$name_tricked +'?time='+ new Date().getTime() 
 			
-			$('#image_tricked').on('load', function(){
+			$('#img').on('load', function(){
 				hideLoader();
 				$(".trick_button").prop("disabled", false);
 			});
 
-			var image_tricked = document.getElementById('image_tricked')
-			image_tricked.src = path_tricked
+			var img = document.getElementById('img')
+			img.src = path_tricked
 
 		}
 

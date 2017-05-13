@@ -19,5 +19,7 @@ Metainfo when developing.
 - upload limit 
 - add compression support, in settings
 - put json is_unparse
+- add upload limit <= 10M
+- js getJson check parse
 
 
