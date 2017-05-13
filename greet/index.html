@@ -3,30 +3,7 @@
 <head>
 	<title>Cook Greet</title>
 	<meta charset="utf-8">
-	<style type="text/css">
-		.is-quiet{
-			display: none;
-		}
-		.is-active{
-			display: block;
-		}
-
-		.loader-spinner {
-			border: 5px solid #f3f3f3; /* Light grey */
-			border-top: 5px solid #555; /* grey */
-			border-radius: 50%;
-			width: 20px;
-			height: 20px;
-			animation: spin 1s linear infinite;
-			display: inline-block;
-		}
-
-		@keyframes spin {
-			0% { transform: rotate(0deg); }
-			100% { transform: rotate(360deg); }
-		}
-
-	</style>
+	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
 	
 </head>
 <body>
@@ -35,7 +12,7 @@
 	<div id="loader" class="is-quiet">
 		<br>
 		<div class="loader-spinner"></div>
-		<span id="loader-text">lala</span>
+		<span id="loader-text"></span>
 	</div>
 
 	<div><input id="inp" type='file'></div>
@@ -50,6 +27,9 @@
 
 	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
+	
 	<script type="text/javascript">
 
 		var API_PATH = "../chef/api.php";

@@ -12,6 +12,7 @@ function router($request_method,$path_info){
 
 		);
 
+
 	foreach ($url_map as $regex_pattern => $function_name) {
 		if (preg_match($regex_pattern,$path_info) === 1){
 			$url_chopped = preg_replace($regex_pattern, '', $path_info);
@@ -35,6 +36,10 @@ function api_deposit(){
 	return $response;
 }
 
+function get_argv3p(){
+	
+}
+
 function process($url_chopped){
 
 	$trick = trim($url_chopped, " /");
@@ -48,6 +53,7 @@ function process($url_chopped){
 	$argv_0 = ABSPATH.'ignite/cmake/bin/'.$trick;
 	$argv_1 = ABSPATH.'fridge/'.$src_image;
 	$argv_2 = ABSPATH.'plate/'.$dst_image;
+
 	$argv_3 = $input['argv_3'];
 
 	$command = $argv_0.' '.$argv_1.' '.$argv_2.' '.$argv_3;
@@ -182,6 +188,8 @@ function api_404(){
 function pre_dump($var){
 	echo '<pre>'.var_export($var,true).'</pre>';
 }
+
+
 
 
 

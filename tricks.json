@@ -1,8 +1,38 @@
 {
-	"alt_format":{
-		"dst_extention_list":["jpg","png","bmp"]
+	"gray":{},
+	"laplacian":{},		
+	"blur":{
+		"argv_type":"slide",
+		"argv_name":"kernel size",
+		"argv_range":"1 50 5"
 	},
-	"gray":{
-		
+	"threshold":{
+		"argv_type":"slide",
+		"argv_name":"threshold value",
+		"argv_range":"1 255 30"
+	},
+	"rotate":{
+		"argv_type":"slide",
+		"argv_name":"rotate angle",
+		"argv_range":"0 360 10"
+	},
+	"resize":{
+		"argv_type":"resize",
+		"argv_name_1":"width",
+		"argv_name_2":"height"
+	},
+	"flip":{
+		"argv_type":"button",
+		"argv_button":{
+			"0":"Vertical flip",
+			"1":"Horizontal flip",
+			"-1":"Both"
+		}
+	},
+	
+	"add_weight":{
+		"argv_type":"slide",
+		"argv_name":"First image weight",
+		"argv_range":"0 1 0.1"
 	}
 }

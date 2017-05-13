@@ -14,3 +14,8 @@
 170509
 
 - no-en support
+
+170511
+
+- upload limit 
+- add compression support, in settings
