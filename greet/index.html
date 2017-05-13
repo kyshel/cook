@@ -4,6 +4,7 @@
 	<title>Cook Greet</title>
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
+
 	
 </head>
 <body>
@@ -16,9 +17,14 @@
 	</div>
 
 	<div><input id="inp" type='file'></div>
-	<img id="img" height="150">
+
+	<div style="/*width:200px;height:200px;*/">
+		<img id="img" height="150">
+	</div>
+	
 	<img id="server_image" height="150">
 
+	<button id="test">test</button>
 	<div id="tricks"></div>
 	<div id="plate">
 		<img id="image_tricked" height="150">
@@ -29,11 +35,30 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
+
+	
 	
 	<script type="text/javascript">
 
 		var API_PATH = "../chef/api.php";
 		var PLATE_PATH = "../plate";
+		var FRIDGE_PATH = "../fridge";
+
+		// load image from cookie, if cookie has set
+		if( readCookie('unique_name') != null){
+			showImageReady(readCookie('unique_name'));
+			showTricks();
+		}
+
+		$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
+
+		$('.test').on('click',function() {
+			$.Jcrop('#img').destroy();
+		});
+			
+
 
 		document.getElementById("inp").addEventListener("change", readFile);
 
@@ -80,7 +105,7 @@
 					createCookie('origin_name',image.origin_name,1);
 					createCookie('unique_name',response.unique_name,1);
 
-					showLoader('Loading valid tricks from server ...');
+					
 					showTricks();
 					
 				}else{
@@ -96,6 +121,8 @@
 
 		function showTricks(){
 			path = API_PATH + "/tricks"
+			showLoader('Loading valid tricks from server ...');
+
 			$.ajax({
 				url: path,
 				type: 'GET',
@@ -195,6 +222,19 @@
 			var image_tricked = document.getElementById('image_tricked')
 			image_tricked.src = path_tricked
 
+		}
+
+		function showImageReady($image_name){
+			showLoader('Downloading image ...');
+
+			path_tricked= FRIDGE_PATH +'/' +$image_name +'?time='+ new Date().getTime() 
+			
+			$('#img').on('load', function(){
+				hideLoader();
+			});
+
+			var image = document.getElementById('img')
+			image.src = path_tricked
 		}
 
 

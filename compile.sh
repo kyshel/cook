@@ -21,4 +21,4 @@ cmake ../cpp/
 echo '--- Step 4, make'
 make
 cd $SCRIPTPATH
-echo 'Install finish, U can test in browser now!'
+echo 'Compile finish, if no error occurs, test in broswer!'

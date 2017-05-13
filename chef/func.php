@@ -4,7 +4,7 @@
 function router($request_method,$path_info){
 	$url_map = array(
 		'/^\/tricks\//' => 'process',
-		'/^\/tricks$/' => 'api_list_valid_tricks',
+		'/^\/tricks$/' => 'get_valid_tricks',
 		'/^\/?$/' => 'api_index',
 
 		'/^\/deposit/' => 'api_deposit', // reponse a cooklie 
@@ -36,27 +36,28 @@ function api_deposit(){
 	return $response;
 }
 
-function get_argv3p(){
-	
-}
 
 function process($url_chopped){
 
 	$trick = trim($url_chopped, " /");
+	if (!in_array($trick,get_valid_tricks())) {
+		return api_404('tricks not valid');
+	}
+		
+
 	//http_response_code(201);
 	$input=get_input(); 
 	//pre_dump($input);
 
-	$src_image=$input['unique_name']; // hash
-	$dst_image=$input['unique_name_a'].'_'.$trick.'.'.$input['unique_name_b']; // hash
+	$src_image=$input['unique_name']; 
+	$dst_image=$input['unique_name_a'].'_cooked'.'.'.$input['unique_name_b']; 
 
 	$argv_0 = ABSPATH.'ignite/cmake/bin/'.$trick;
 	$argv_1 = ABSPATH.'fridge/'.$src_image;
 	$argv_2 = ABSPATH.'plate/'.$dst_image;
+	$argv_3p = $input['argv_3p']; // need check
 
-	$argv_3 = $input['argv_3'];
-
-	$command = $argv_0.' '.$argv_1.' '.$argv_2.' '.$argv_3;
+	$command = $argv_0.' '.$argv_1.' '.$argv_2.' '.$argv_3p;
 	//echo $command . "\n";
 
 
@@ -100,12 +101,12 @@ function get_input(){
 	$origin_name_a = $origin_name_parts['filename'];
 	$origin_name_b = $origin_name_parts['extension'];
 
-	if (isset($array_input['unique_name'])) {
+	if (isset($array_input['unique_name'])) { // deposited
 		$unique_name = $array_input['unique_name'];
 		$unique_name_parts = pathinfo($array_input['unique_name']);
 		$unique_name_a = $unique_name_parts['filename'];
 		$unique_name_b = $unique_name_parts['extension'];
-	}else{
+	}else{ // deposit
 		$unique_name_a = get_unique_name();
 		$unique_name_b = $origin_name_parts['extension'];
 		$unique_name = $unique_name_a.'.'.$unique_name_b;
@@ -114,7 +115,7 @@ function get_input(){
 		http_response_code(201);
 	}
 
-	$argv_3=isset($array_input['argv_3'])?$array_input['argv_3']:'';
+	$argv_3p=isset($array_input['argv_3p'])?$array_input['argv_3p']:'';
 
 	$stored_input=array(
 		'origin_name' => $array_input['origin_name'] , 
@@ -125,7 +126,7 @@ function get_input(){
 		'unique_name_a' => $unique_name_a , 
 		'unique_name_b' => $unique_name_b , 
 
-		'argv_3' => $argv_3 , 
+		'argv_3p' => $argv_3p , 
 		);
 
 	return $stored_input; 
@@ -154,7 +155,7 @@ function base64_to_jpeg($base64_string, $output_file) {
 
 
 
-function api_list_valid_tricks(){
+function get_valid_tricks(){
 	$dir_bin=ABSPATH."ignite/cmake/bin/";
 	$files = array_diff(scandir($dir_bin), array('..', '.'));
 	//pre_dump($files);
@@ -178,9 +179,10 @@ function api_index(){
 	return $data;
 }
 
-function api_404(){
+function api_404($message = 'Not found'){
+	http_response_code(404);
 	$data = array(
-		'message' => 'Not found',
+		'message' => $message,
 		);
 	return $data;
 }

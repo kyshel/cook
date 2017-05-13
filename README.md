@@ -14,7 +14,7 @@ Deploy from a minimal CentOS7 installation
 1. `firewall-cmd --permanent --zone=public --add-service=http && firewall-cmd --reload`
 1. `cd /var/www/html && git clone https://github.com/kyshel/cook.git`
 1. `cd cook`
-1. `./install.sh`
+1. `./compile.sh`
 1. Input `your.server.address/cook` in browser, enjoy ~
 
 ## Addtionals
@@ -24,4 +24,5 @@ Core Principle Inspired By
 
 
 ## Credit
+MIT License     
 Made with ❤ by [kyshel](http://github.com/kyshel)  
