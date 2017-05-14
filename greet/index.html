@@ -39,15 +39,25 @@
 	</div><br>
 
 	<div id="wrapper_tricks">
-		<div id="tricks"></div>
+		<div id="tricks_panel" class="btn-group"></div>
 	</div><br>
+
+	<div id="wrapper_toolbox">
+		<div id="toolbox"></div>
+	</div>
 
 	<div id="wrapper_image">
 		<img id="img" height="250">
 	</div><br>
+
+
 	
 	
 
+
+<hr>
+below is test area
+<hr>
 
 	<button id="test">test</button>
 
@@ -80,6 +90,8 @@
 		</div>
 
 	</div>
+
+	
 	
 
 
@@ -192,82 +204,105 @@
 			});
 		}
 
-		function showButtons(tricks){
-			buttons = 'tricks: ';
-
-			$.getJSON("tricks.json?"+ new Date().getTime(), function(data) {
-			console.log(data); 
-
+		function getTircksTree(tricks,json_object){
 			// make hash table
 			var group_name,
 			group,
 			i,
-			hash_table={};
+			hash_table={},
+			trick,
+			map_table={},
+			tricks_tree;
 
-			for(group_name in data.tricks_classify){
-				group = data.tricks_classify[group_name];
-				for( i in group){
-					console.log(group[i]); 
-					console.log(group_name); 
+			tricks_tree=json_object.tricks_classify;
+			for(group_name in tricks_tree){
+				group = json_object.tricks_classify[group_name];
+				for( i in group){ 
 					hash_table[group[i]] = group_name;
 				}
 			}
 
-			console.log(hash_table); 
 
-			// for (var i = data['tricks_reclassify'].length - 1; i >= 0; i--) {
-			// 	console.log(data[i]); 
-			// }
-
-			
-
-			// filter_object=data.filter[op];
-
-			// if (filter_object.hasOwnProperty("argv_type")) {
-			// 	if (filter_object.argv_type == 'slide') {
-			// 		var argv_split=filter_object.argv_range.split(' ');
-			// 		show_argv_control(op,argv_split,filter_object.argv_name)
-			// 	}else if(filter_object.argv_type == 'resize'){
-			// 		show_argv_control_resize(op,filter_object)
-			// 	}else if(filter_object.argv_type == 'button'){
-			// 		show_argv_control_button(op,filter_object)
-			// 	}
-			// }else{
-			// 	$('#argv_control').html(capitalizeFirstLetter(op) + ' result:');
-			// 	send_ajax(op);
-			// }
-
-
-
-		});
-
-
-
-
-			for (var i = 0, len = tricks.length; i < len; i++) {
-				buttons += '<button  class="trick_button">'+ tricks[i] +'</button> ';
+			tricks_tree['others'] = [];
+			for(i in tricks){
+				trick = tricks[i];
+				if (!hash_table.hasOwnProperty(trick)) {
+					tricks_tree['others'].push(trick)
+				}
 			}
 
-			$('#tricks').html(buttons);
-			$('.trick_button').on('click',function() {
-				$(".trick_button").prop("disabled", true);
-				wish(this.textContent)
+			return tricks_tree;
+		}
+
+		function showButtons(tricks){
+			buttons = 'tricks: ';
+
+			$.getJSON("tricks.json?"+ new Date().getTime(), function(json_object) {
+
+				var tricks_tree = getTircksTree(tricks,json_object);
+
+				var group_name,i,trick,trick_groups='';
+				for( group_name in tricks_tree){
+
+
+					trick_buttons ='';
+					for( i in  tricks_tree[group_name]){
+						trick = tricks_tree[group_name][i];
+						trick_buttons +='<li class="trick_button" data-trick="'+trick+'"><a href="#">'+upFirstLetter(trick)+'</a></li>';
+					}
+
+					trick_groups+='<div class="btn-group" role="group"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">'+upFirstLetter(group_name) +'<span class="caret"></span></button><ul class="dropdown-menu">'+trick_buttons+'</ul></div>';
+
+				}
+
+				html_edit = '<button type="button" class="btn btn-default">U</button><button type="button" class="btn btn-default">R</button>';
+				html_tricks_panel=html_edit+trick_groups;
+				$('#tricks_panel').html(html_tricks_panel);
+
+
+				$('.trick_button').click(function() {
+					wish($(this).data('trick'))
+				});
+
+
+
+
+
+
 			});
+
+		}
+
+
+		// wish to deposited image
+		function wish(trick){
+			argv_3p = '';
+			if (trick == 'resize') {
+
+			}else{
+				sendWish(trick,argv_3p);
+			}
 		}
 
 
 
 
-		// wish to deposited image
-		function wish(trick) {		
+		// apply
+		function sendWish(trick,argv_3p) {	
+
 			showLoader('Processing...');
-			var path = API_PATH + "/tricks/" + trick
+
+			var path = API_PATH + "/tricks/" + trick;
+			console.log(path);
+
 
 
 			image = {
 					"unique_name" : readCookie('unique_name'),
-					"origin_name" : readCookie('origin_name')
+					"origin_name" : readCookie('origin_name'),
+					"argv_3p" : argv_3p
 			}
+			console.log(image);
 
 
 
@@ -280,7 +315,9 @@
 				if (xhr.status == 201) {
 					onPlate(response.image.tricked_name); 				
 				}else{
-					console.log('wish() status code wrong!');
+					var message = 'wish() status code wrong!';
+					showLoader(message);
+					console.log(message);
 				}
 			}).error( function(e) {
 				console.log('wish() eroor occured');
@@ -289,24 +326,7 @@
 		}
 
 
-		// apply button
-		function sendWish(path,image){
-			$.ajax({
-				url: path,
-				type: 'PUT',
-				dataType: "json",
-				data: JSON.stringify(image),
-			}).success( function(response,status,xhr) {
-				if (xhr.status == 201) {
-					onPlate(response.image.tricked_name); 				
-				}else{
-					console.log('wish() status code wrong!');
-				}
-			}).error( function(e) {
-				console.log('wish() eroor occured');
-				console.log(e);
-			});
-		}
+
 
 
 
@@ -342,7 +362,7 @@
 			
 			$('#img').on('load', function(){
 				hideLoader();
-				$(".trick_button").prop("disabled", false);
+				$(".btn").prop("disabled", false);
 			});
 
 			var img = document.getElementById('img')
@@ -386,6 +406,7 @@
 		}
 
 
+		// cookie
 		function createCookie(name,value,days) {
 			if (days) {
 				var date = new Date();
@@ -409,6 +430,12 @@
 
 		function eraseCookie(name) {
 			createCookie(name,"",-1);
+		}
+
+
+		// capitalizeFirstLetter
+		function upFirstLetter(string) {
+			return string.charAt(0).toUpperCase() + string.slice(1);
 		}
 
 	</script>
