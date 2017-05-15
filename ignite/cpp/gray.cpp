@@ -15,7 +15,7 @@ int main(int argc, char** argv)
     Mat dst_image;
     src_image = imread(src_path, 1);
 
-    if (argc != 3 || !src_image.data)
+    if (!src_image.data)
     {
         printf(" No image data \n ");
         return -1;

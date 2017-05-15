@@ -1,8 +1,5 @@
-fridge/*
-plate/*
+imgs/*
 ignite/cmake/*
 
-!fridge/README.md
-!plate/README.md
 !ignite/README.md
 

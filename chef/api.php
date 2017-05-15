@@ -11,7 +11,7 @@ $config_data['PATH_INFO'] = $_SERVER['PATH_INFO'];
 //echo '<meta charset="utf-8">'; 
 //check $_SERVER['PATH_INFO'] not too long, incase regex crash
 //pre_dump($_SERVER);
-if ($_GET['d'] == '1') {
+if (isset($_GET['d']) && ($_GET['d'] == '1')) {
 	pre_dump($config_data);
 	echo "\n\n";
 }

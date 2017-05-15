@@ -1,6 +1,7 @@
 <?php
+if(!defined('ABSPATH')) exit;  // Exit if accessed directly
 
-// redirect accorfing patj_info
+// redirect according path_info
 function router($request_method,$path_info){
 	$url_map = array(
 		'/^\/tricks\//' => 'process',
@@ -25,14 +26,19 @@ function router($request_method,$path_info){
 
 function api_deposit(){
 	$input=get_input();
-	$_SESSION['cook_origin_name'] = $input['origin_name'];
-	$_SESSION['cook_unique_name'] = $input['unique_name'];
+	
 	$message = "deposit OK";
+
 	$response=array(
-		'message'=> $message,
-		'origin_name' => $_SESSION['cook_origin_name'],
-		'unique_name' => $_SESSION['cook_unique_name'],
+		'message'=> $message ,
+		'origin_name' =>  $input['origin_name'],
+		'uid' =>  $input['uid'],
+		'src_ext' =>  $input['src_ext'],
+		'dst_ext' =>  $input['dst_ext'],
+		'step' =>  $input['step'],
 		);
+	//pre_dump($response);
+
 	return $response;
 }
 
@@ -47,18 +53,21 @@ function process($url_chopped){
 
 	//http_response_code(201);
 	$input=get_input(); 
-	//pre_dump($input);
-
-	$src_image=$input['unique_name']; 
-	$dst_image=$input['unique_name_a'].'_cooked'.'.'.$input['unique_name_b']; 
+	$uid= $input['uid'];
+	$pre_step=$input['step'] ; 
+	$now_step=$input['step'] + 1;
+	$src_ext=$input['src_ext']; 
+	$dst_ext=$input['dst_ext']; 
+	$src_image=ABSPATH.'imgs/'.$uid.'/step'.$pre_step.'.'.$src_ext; 
+	$dst_image=ABSPATH.'imgs/'.$uid.'/step'.$now_step.'.'.$dst_ext; 
 
 	$argv_0 = ABSPATH.'ignite/cmake/bin/'.$trick;
-	$argv_1 = ABSPATH.'fridge/'.$src_image;
-	$argv_2 = ABSPATH.'plate/'.$dst_image;
+	$argv_1 = $src_image;
+	$argv_2 = $dst_image;
 	$argv_3p = $input['argv_3p']; // need check
 
 	$command = $argv_0.' '.$argv_1.' '.$argv_2.' '.$argv_3p;
-	//echo $command . "\n";
+	//echo "\n".$command . "\n";
 
 
 	$command_escaped = escapeshellcmd($command);
@@ -79,8 +88,10 @@ function process($url_chopped){
 	$data['message'] = $message;
 	$data['image'] =  array(
 		'origin_name' => $input['origin_name'], 
-		'unique_name' => $src_image, 
-		'tricked_name' => $dst_image, 
+		'uid' => $input['uid'], 
+		'step' => $now_step, 
+		'src_ext' => $src_ext,
+		'dst_ext' => $dst_ext
 		);
 
 	return $data; 
@@ -99,41 +110,45 @@ function get_input(){
 
 	$origin_name_parts = pathinfo($array_input['origin_name']);
 	$origin_name_a = $origin_name_parts['filename'];
-	$origin_name_b = $origin_name_parts['extension'];
+	$src_ext = $origin_name_parts['extension'];
 
-	if (isset($array_input['unique_name'])) { // deposited
-		$unique_name = $array_input['unique_name'];
-		$unique_name_parts = pathinfo($array_input['unique_name']);
-		$unique_name_a = $unique_name_parts['filename'];
-		$unique_name_b = $unique_name_parts['extension'];
-	}else{ // deposit
-		$unique_name_a = get_unique_name();
-		$unique_name_b = $origin_name_parts['extension'];
-		$unique_name = $unique_name_a.'.'.$unique_name_b;
-		base64_to_jpeg($array_input['content'], ABSPATH.'fridge/'.$unique_name);
+	if (isset($array_input['uid'])) { // deposited
+		$uid = $array_input['uid'];
+		$step = $array_input['step'];
+		$src_ext = $array_input['src_ext'];
+	}else{ // deposit before trick
+		$uid = get_uid();
+		$ext = $origin_name_parts['extension']; // deposit_tmp_ext
+		$step = 0;
+		$unique_path = ABSPATH.'imgs/'.$uid;
+		$file_path = ABSPATH.'imgs/'.$uid.'/step'.$step.'.'.$ext;
+		mkdir($unique_path , 0700);
+		base64_to_jpeg($array_input['content'], $file_path);
 		// (refactor) if last code write ok, then 
 		http_response_code(201);
 	}
 
 	$argv_3p=isset($array_input['argv_3p'])?$array_input['argv_3p']:'';
+	$dst_ext=isset($array_input['dst_ext'])?$array_input['dst_ext']:$origin_name_parts['extension'];
 
 	$stored_input=array(
-		'origin_name' => $array_input['origin_name'] , 
-		'origin_name_a' => $origin_name_a , 
-		'origin_name_b' => $origin_name_b , 
+		'origin_name' => $array_input['origin_name'],  
+		 
+		'uid' => $uid , 
+		'step' => $step , 
 
-		'unique_name' => $unique_name , 
-		'unique_name_a' => $unique_name_a , 
-		'unique_name_b' => $unique_name_b , 
+		'src_ext' => $src_ext ,
+		'dst_ext' => $dst_ext , 	
 
 		'argv_3p' => $argv_3p , 
 		);
 
+	//pre_dump($stored_input);
+
 	return $stored_input; 
 }
 
-function get_unique_name(){
-
+function get_uid(){
 	return uniqid().'_'.rand();
 }
 

@@ -81,22 +81,17 @@ below is test area
 	<script type="text/javascript">
 
 		var API_PATH = "../chef/api.php";
-		var PLATE_PATH = "../plate";
-		var FRIDGE_PATH = "../fridge";
+		var IMGS_PATH = "../imgs";
+
 
 		// load image from cookie, if cookie has set
-		if( readCookie('unique_name') != null){
-			showImageReady(readCookie('unique_name'));
+		if( readCookie('uid') != null){
+			showImageReady(readCookie('uid'));
 			showTricks();
 		}
 
 		//$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
-		$("#example_id").ionRangeSlider({
-			min: 1,
-			max: 200,
-			from: 100,
-			postfix: "%"
-		});
+
 
 
 			
@@ -141,11 +136,18 @@ below is test area
 				hideLoader();
 
 				if (xhr.status == 201) {
+					console.log(response);
 					eraseCookie('origin_name');
-					eraseCookie('unique_name');
+					eraseCookie('uid');
+					eraseCookie('step');
+					eraseCookie('src_ext');
 
 					createCookie('origin_name',image.origin_name,1);
-					createCookie('unique_name',response.unique_name,1);
+					createCookie('uid',response.uid,1);
+					createCookie('step',response.step,1);
+					createCookie('src_ext',response.src_ext,1);
+					
+					
 
 					
 					showTricks();
@@ -182,7 +184,7 @@ below is test area
 			});
 		}
 
-		function getTircksTree(tricks,json_object){
+		function getTricksTree(tricks,json_object){
 			// make hash table
 			var group_name,
 			group,
@@ -217,7 +219,7 @@ below is test area
 
 			$.getJSON("tricks.json?"+ new Date().getTime(), function(json_object) {
 
-				var tricks_tree = getTircksTree(tricks,json_object);
+				var tricks_tree = getTricksTree(tricks,json_object);
 
 				var group_name,i,trick,trick_groups='';
 				for( group_name in tricks_tree){
@@ -233,13 +235,21 @@ below is test area
 
 				}
 
-				html_edit = '<button type="button" class="btn btn-default">U</button><button type="button" class="btn btn-default">R</button>';
+				html_edit = '<button id="undo" type="button" class="btn btn-default" >U</button><button id="redo" type="button" class="btn btn-default">R</button>';
 				html_tricks_panel=html_edit+trick_groups;
 				$('#tricks_panel').html(html_tricks_panel);
 
 
 				$('.trick_button').click(function() {
 					wish($(this).data('trick'))
+				});
+
+				$('#redo').click(function() {
+					redo();
+				});
+
+				$('#undo').click(function() {
+					undo();
 				});
 
 
@@ -249,6 +259,27 @@ below is test area
 
 			});
 
+		}
+
+		function undo(){
+			now_step =  Number(readCookie('step'))
+			console.log(now_step)
+			createCookie('step',now_step-1);
+			console.log(readCookie('step'))
+			reloadImg();
+		}
+
+		function redo(){
+			now_step =  Number(readCookie('step'))
+			createCookie('step',now_step+1);
+			reloadImg();
+		}
+
+		function reloadImg(){
+			after_step=readCookie('step');
+			uid = readCookie('uid');
+			src_ext = readCookie('src_ext');
+			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +after_step+'.'+src_ext ;
 		}
 
 		
@@ -308,12 +339,13 @@ below is test area
 			showLoader('Processing...');
 
 			var path = API_PATH + "/tricks/" + trick;
-			console.log(path);
 
 
 
 			image = {
-					"unique_name" : readCookie('unique_name'),
+					"uid" : readCookie('uid'),
+					"step" : readCookie('step'),
+					"src_ext" : readCookie('src_ext'),
 					"origin_name" : readCookie('origin_name'),
 					"argv_3p" : argv_3p
 			}
@@ -328,7 +360,7 @@ below is test area
 				data: JSON.stringify(image),
 			}).success( function(response,status,xhr) {
 				if (xhr.status == 201) {
-					onPlate(response.image.tricked_name); 				
+					onPlate(response); 				
 				}else{
 					var message = 'wish() status code wrong!';
 					showLoader(message);
@@ -370,10 +402,19 @@ below is test area
 			});
 		}
 
-		function onPlate($name_tricked){
+		function onPlate(response){
+			
+			uid=response.image.uid;
+			step = response.image.step;
+			src_ext = response.image.dst_ext;
+
+			createCookie('step',step);
+			createCookie('src_ext',src_ext);
+
+
 			showLoader('Downloading processed image...');
 
-			path_tricked= PLATE_PATH +'/' +$name_tricked +'?time='+ new Date().getTime() 
+			path_tricked= IMGS_PATH +'/' +uid+'/step'+step+'.'+src_ext;
 			
 			$('#img').on('load', function(){
 				hideLoader();
@@ -382,13 +423,15 @@ below is test area
 
 			var img = document.getElementById('img')
 			img.src = path_tricked
-
 		}
 
-		function showImageReady($image_name){
+		function showImageReady(image_name){
 			showLoader('Downloading image ...');
+			uid=readCookie('uid');
+			step=readCookie('step');
+			src_ext=readCookie('src_ext');
 
-			path_tricked= FRIDGE_PATH +'/' +$image_name +'?time='+ new Date().getTime() 
+			path_tricked= IMGS_PATH +'/' +uid +'/step' +step+'.'+src_ext ;
 			
 			$('#img').on('load', function(){
 				hideLoader();
