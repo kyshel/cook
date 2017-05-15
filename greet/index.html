@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Cook Greet</title>
 	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Cook Greet</title>
+
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
@@ -44,10 +48,10 @@
 
 	<div id="wrapper_toolbox">
 		<div id="toolbox"></div>
-	</div>
+	</div><br>
 
-	<div id="wrapper_image">
-		<img id="img" height="250">
+	<div id="wrapper_image" class="container">
+		<img id="img" class="_img-thumbnail " height="150" >
 	</div><br>
 
 
@@ -63,33 +67,7 @@ below is test area
 
 	<input type="text" id="example_id" name="example_name" value="" />
 
-	<div class="btn-group" role="group" aria-label="...">
-		<button type="button" class="btn btn-default">U</button>
-		<button type="button" class="btn btn-default">R</button>
 
-		<div class="btn-group" role="group">
-			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				Basic
-				<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu">
-				<li><a href="#">resize</a></li>
-				<li><a href="#">Dropdown link</a></li>
-			</ul>
-		</div>
-
-		<div class="btn-group" role="group">
-			<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-				Effect
-				<span class="caret"></span>
-			</button>
-			<ul class="dropdown-menu">
-				<li><a href="#">Dropdown link</a></li>
-				<li><a href="#">Dropdown link</a></li>
-			</ul>
-		</div>
-
-	</div>
 
 	
 	
@@ -144,7 +122,7 @@ below is test area
 				FR.readAsDataURL(file_input.files[0]);
 
 				FR.onloadstart = function(e){
-					$('#plate').html('<img id="img" height="150">');
+					$('#plate').html('<img id="img" >');
 					showLoader('Loading image...');
 				};
 			}
@@ -265,7 +243,7 @@ below is test area
 				});
 
 
-
+				//wish('resize');
 
 
 
@@ -273,11 +251,48 @@ below is test area
 
 		}
 
-
+		
 		// wish to deposited image
 		function wish(trick){
 			argv_3p = '';
 			if (trick == 'resize') {
+				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number">	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button>';
+				$('#toolbox').html(html_toolbox);
+
+				var img_size = {
+					'display_width':$('#img')[0].width,
+					 'display_height':$('#img')[0].height,
+					 'natural_width':$('#img')[0].naturalWidth,
+					 'natural_height':$('#img')[0].naturalHeight,
+				} ;
+				$('#resize_width').val(img_size.natural_width);
+				$('#resize_height').val(img_size.natural_height);
+
+
+				$("#resize_slider").ionRangeSlider({
+					min: 1,
+					max: 200,
+					from: 100,
+					postfix: "%",
+					onChange: function (data) {						
+						resized_width = Math.round(img_size.natural_width * data.from * 0.01);
+						resized_height = Math.round(img_size.natural_height * data.from * 0.01);
+						$('#resize_width').val(resized_width);
+						$('#resize_height').val(resized_height);
+						$('#img')[0].width=Math.round( img_size.display_width * data.from * 0.01);
+						$('#img')[0].height=Math.round(img_size.display_height * data.from * 0.01);
+
+					},
+				});
+
+			
+				$('#resize_apply').click(function() {
+					argv_3p = $('#resize_width').val() +' '+ $('#resize_height').val();
+					sendWish(trick,argv_3p);
+					$('#toolbox').html('');
+					
+
+				});
 
 			}else{
 				sendWish(trick,argv_3p);
