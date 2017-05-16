@@ -92,11 +92,6 @@ below is test area
 
 		//$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
 
-
-
-			
-
-
 		document.getElementById("inp").addEventListener("change", readFile);
 
 		function readFile() {		
@@ -140,12 +135,16 @@ below is test area
 					eraseCookie('origin_name');
 					eraseCookie('uid');
 					eraseCookie('step');
+					eraseCookie('max_step');
 					eraseCookie('src_ext');
+					eraseCookie('undo');
 
 					createCookie('origin_name',image.origin_name,1);
 					createCookie('uid',response.uid,1);
 					createCookie('step',response.step,1);
+					createCookie('max_step',response.step,1);
 					createCookie('src_ext',response.src_ext,1);
+					createCookie('undo',0);
 					
 					
 
@@ -215,8 +214,6 @@ below is test area
 		}
 
 		function showButtons(tricks){
-			buttons = 'tricks: ';
-
 			$.getJSON("tricks.json?"+ new Date().getTime(), function(json_object) {
 
 				var tricks_tree = getTricksTree(tricks,json_object);
@@ -235,51 +232,74 @@ below is test area
 
 				}
 
-				html_edit = '<button id="undo" type="button" class="btn btn-default" >U</button><button id="redo" type="button" class="btn btn-default">R</button>';
+				html_edit = '<button id="undo" type="button" class="btn btn-default travel" >U</button><button id="redo" type="button" class="btn btn-default travel">R</button>';
 				html_tricks_panel=html_edit+trick_groups;
 				$('#tricks_panel').html(html_tricks_panel);
+				checkStep();
 
 
 				$('.trick_button').click(function() {
 					wish($(this).data('trick'))
 				});
 
+				$('#undo').click(function() {
+					$(".btn").prop("disabled", true);
+					undo();					
+				});
+
 				$('#redo').click(function() {
+					$(".btn").prop("disabled", true);
 					redo();
 				});
 
-				$('#undo').click(function() {
-					undo();
-				});
-
-
-				//wish('resize');
-
-
+				
 
 			});
 
 		}
 
+		// check after tricked, or travaled
+		function checkStep(){
+			step = readCookie('step');
+			max_step = readCookie('max_step');
+			
+			if (step > 0) {
+				$("#undo").prop("disabled", false);
+			}
+			else{
+				$("#undo").prop("disabled", true);
+			}
+
+			if (max_step <= step ) {
+				$("#redo").prop("disabled", true);
+				createCookie('max_step',step,1);
+			}
+			else{
+				$("#redo").prop("disabled", false);
+			}
+
+		}
+
 		function undo(){
-			now_step =  Number(readCookie('step'))
-			console.log(now_step)
-			createCookie('step',now_step-1);
-			console.log(readCookie('step'))
+			step_now =  Number(readCookie('step'))
+			createCookie('step',step_now-1,1);
+			createCookie('undo',1,1);
 			reloadImg();
 		}
 
 		function redo(){
-			now_step =  Number(readCookie('step'))
-			createCookie('step',now_step+1);
+			step_now =  Number(readCookie('step'))
+			createCookie('step',step_now+1,1);
 			reloadImg();
 		}
 
 		function reloadImg(){
-			after_step=readCookie('step');
+			step_after=readCookie('step');
 			uid = readCookie('uid');
 			src_ext = readCookie('src_ext');
-			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +after_step+'.'+src_ext ;
+			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ;
+			$(".btn").not(".travel").prop("disabled", false);
+			checkStep();
 		}
 
 		
@@ -321,7 +341,6 @@ below is test area
 					argv_3p = $('#resize_width').val() +' '+ $('#resize_height').val();
 					sendWish(trick,argv_3p);
 					$('#toolbox').html('');
-					
 
 				});
 
@@ -340,8 +359,6 @@ below is test area
 
 			var path = API_PATH + "/tricks/" + trick;
 
-
-
 			image = {
 					"uid" : readCookie('uid'),
 					"step" : readCookie('step'),
@@ -349,8 +366,6 @@ below is test area
 					"origin_name" : readCookie('origin_name'),
 					"argv_3p" : argv_3p
 			}
-			console.log(image);
-
 
 
 			$.ajax({
@@ -408,8 +423,14 @@ below is test area
 			step = response.image.step;
 			src_ext = response.image.dst_ext;
 
-			createCookie('step',step);
-			createCookie('src_ext',src_ext);
+			createCookie('step',step,1);
+			createCookie('src_ext',src_ext,1);
+			is_undo = Number(readCookie('undo'));
+			if (is_undo == 1) { // if undo, reset max_step
+				createCookie('max_step',step,1);
+				createCookie('undo',0,1);
+			}
+
 
 
 			showLoader('Downloading processed image...');
@@ -418,7 +439,8 @@ below is test area
 			
 			$('#img').on('load', function(){
 				hideLoader();
-				$(".btn").prop("disabled", false);
+				$(".btn").not(".travel").prop("disabled", false);
+				checkStep();
 			});
 
 			var img = document.getElementById('img')
@@ -441,9 +463,6 @@ below is test area
 			image.src = path_tricked
 		}
 
-
-
-
 		function getFile(){
 			var files = document.getElementById("inp").files;
 			if (files.length > 1){
@@ -452,12 +471,12 @@ below is test area
 			return files[0];
 		}
 
-
 		function showLoader($text){
 			$('#loader-text').html($text);
 			$('#loader').removeClass('is-quiet');
 			$('#loader').addClass('is-active');
 		}
+
 		function hideLoader(){
 			$('#loader').removeClass('is-active');
 			$('#loader').addClass('is-quiet');

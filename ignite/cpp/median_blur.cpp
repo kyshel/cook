@@ -13,8 +13,8 @@ int main(int argc, char** argv)
 		"{help h usage ? |      | print help   }"
 		"{@src_image     |      | src_image   }"
 		"{@dst_image     |      | dst_image   }"
-		"{s size         | 51 |   kernel size }"
-		"{D debug        |   |   0-no, 1-yes }"
+		"{s size         |  10  |   kernel size }"
+		"{D debug        |      |   0-no, 1-yes }"
 		;
 	CommandLineParser parser(argc, argv, keys);
 	String src_path = parser.get<String>(0);
