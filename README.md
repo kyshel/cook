@@ -1,5 +1,10 @@
 # Cook
-Cook images by various tricks.
+>Cook images by various tricks.
+
+Cook is an online image process platform.
+Core process is driven by OpenCV C++.    
+PHP expose web API for client invoking.    
+An HTML page as greet stage. 
 
 ## Require
 - Cmake >= 2.8
@@ -18,7 +23,7 @@ Deploy from a minimal CentOS7 installation
 1. Input `your.server.address/cook` in browser, enjoy ~
 
 ## Addtionals
-Core Principle Inspired By
+Inspired By
 - Github API (REST)
 - Django (url match)
 

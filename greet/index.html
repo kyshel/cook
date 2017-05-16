@@ -7,8 +7,6 @@
 
     <title>Cook Greet</title>
 
-	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
-
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
@@ -26,6 +24,9 @@
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.min.css" >
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.skinNice.min.css" >
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/js/ion.rangeSlider.min.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
+
 
 
 	
@@ -50,8 +51,10 @@
 		<div id="toolbox"></div>
 	</div><br>
 
-	<div id="wrapper_image" class="container">
-		<img id="img" class="_img-thumbnail " height="150" >
+	<div id="wrapper_image" >
+		<div id="img_container">
+		<img id="img" class="_img-thumbnail ">
+		</div>
 	</div><br>
 
 
@@ -93,6 +96,13 @@ below is test area
 		//$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
 
 		document.getElementById("inp").addEventListener("change", readFile);
+
+		$('#img').on('load', function(){
+			hideLoader();
+			$(".btn").not(".travel").prop("disabled", false);
+			checkStep();
+		});
+
 
 		function readFile() {		
 			var file_input = document.getElementById("inp")
@@ -258,7 +268,7 @@ below is test area
 
 		}
 
-		// check after tricked, or travaled
+		// check after tricked, or traveled
 		function checkStep(){
 			step = readCookie('step');
 			max_step = readCookie('max_step');
@@ -297,7 +307,11 @@ below is test area
 			step_after=readCookie('step');
 			uid = readCookie('uid');
 			src_ext = readCookie('src_ext');
+
+			$("#img").removeAttr('width');
+			$("#img").removeAttr('height');
 			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ;
+
 			$(".btn").not(".travel").prop("disabled", false);
 			checkStep();
 		}
@@ -307,7 +321,7 @@ below is test area
 		function wish(trick){
 			argv_3p = '';
 			if (trick == 'resize') {
-				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number">	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button>';
+				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox"></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button><button id="resize_cancel">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {
@@ -319,13 +333,41 @@ below is test area
 				$('#resize_width').val(img_size.natural_width);
 				$('#resize_height').val(img_size.natural_height);
 
+				var aspect_ratio = (img_size.natural_width/img_size.natural_height);
+
+				$('#aspect_lock').change(function(){
+					if ($(this).is(':checked')) {
+
+						$('#resize_width').on('input',function(e){
+							now_width = this.value;
+							$('#resize_height').val(Math.round(now_width * aspect_ratio));
+						});
+
+						$('#resize_height').on('input',function(e){
+							now_height = this.value;
+							$('#resize_width').val(Math.round(now_height * aspect_ratio));
+						});
+
+					}else{
+						$('#resize_width').off('input');
+						$('#resize_height').off('input');
+					}
+				});
+
+				
+
+				
+
 
 				$("#resize_slider").ionRangeSlider({
 					min: 1,
 					max: 200,
 					from: 100,
 					postfix: "%",
-					onChange: function (data) {						
+					onChange: function (data) {
+						$('#img').css({
+							"max-width":"200%"
+						});						
 						resized_width = Math.round(img_size.natural_width * data.from * 0.01);
 						resized_height = Math.round(img_size.natural_height * data.from * 0.01);
 						$('#resize_width').val(resized_width);
@@ -339,9 +381,16 @@ below is test area
 			
 				$('#resize_apply').click(function() {
 					argv_3p = $('#resize_width').val() +' '+ $('#resize_height').val();
-					sendWish(trick,argv_3p);
 					$('#toolbox').html('');
+					$('#img').css({
+						"max-width":""
+					});	
+					sendWish(trick,argv_3p);
+				});
 
+				$('#resize_cancel').click(function() {				
+					$('#toolbox').html('');
+					reloadImg();
 				});
 
 			}else{
@@ -425,42 +474,23 @@ below is test area
 
 			createCookie('step',step,1);
 			createCookie('src_ext',src_ext,1);
+
 			is_undo = Number(readCookie('undo'));
 			if (is_undo == 1) { // if undo, reset max_step
 				createCookie('max_step',step,1);
 				createCookie('undo',0,1);
 			}
 
-
-
 			showLoader('Downloading processed image...');
+			reloadImg();
 
-			path_tricked= IMGS_PATH +'/' +uid+'/step'+step+'.'+src_ext;
 			
-			$('#img').on('load', function(){
-				hideLoader();
-				$(".btn").not(".travel").prop("disabled", false);
-				checkStep();
-			});
 
-			var img = document.getElementById('img')
-			img.src = path_tricked
 		}
 
 		function showImageReady(image_name){
-			showLoader('Downloading image ...');
-			uid=readCookie('uid');
-			step=readCookie('step');
-			src_ext=readCookie('src_ext');
-
-			path_tricked= IMGS_PATH +'/' +uid +'/step' +step+'.'+src_ext ;
-			
-			$('#img').on('load', function(){
-				hideLoader();
-			});
-
-			var image = document.getElementById('img')
-			image.src = path_tricked
+			showLoader('Downloading last loaded image ...');
+			reloadImg();
 		}
 
 		function getFile(){

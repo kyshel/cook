@@ -2,7 +2,8 @@
 	"tricks_classify":{
 		"basic":["resize"],
 		"effects":["gray","blur"]
-	}
+	},
+	"resize_max_limit":10000
 
 
 
