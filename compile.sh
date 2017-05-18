@@ -5,9 +5,9 @@ SCRIPT=$(readlink -f "$0")
 # Absolute path this script is in, thus /home/user/bin
 SCRIPTPATH=$(dirname "$SCRIPT")
 # echo $SCRIPTPATH
-echo '--- Step 1, mkdir fridge/, plate/, imgs/'
-mkdir -p fridge plate imgs
-chown apache:apache fridge/ plate/ imgs/
+echo '--- Step 1, mkdir imgs/'
+mkdir -p imgs
+chown apache:apache imgs/
 
 echo '--- Step 2, mkdir cmake/ in ignite/'
 cd ./ignite/

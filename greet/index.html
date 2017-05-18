@@ -321,7 +321,7 @@ below is test area
 		function wish(trick){
 			argv_3p = '';
 			if (trick == 'resize') {
-				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox"></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button><button id="resize_cancel">Cancel</button>';
+				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button><button id="resize_cancel">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {
@@ -337,6 +337,11 @@ below is test area
 
 				$('#aspect_lock').change(function(){
 					if ($(this).is(':checked')) {
+						width_inputbox = $('#resize_width').val();;
+						height_inputbox = $('#resize_height').val();;
+						if ( height_inputbox * aspect_ratio != width_inputbox ) {
+							$('#resize_height').val(width_inputbox * aspect_ratio)
+						}
 
 						$('#resize_width').on('input',function(e){
 							now_width = this.value;
@@ -367,7 +372,8 @@ below is test area
 					onChange: function (data) {
 						$('#img').css({
 							"max-width":"200%"
-						});						
+						});
+						$( "#aspect_lock" ).prop( "checked", true );					
 						resized_width = Math.round(img_size.natural_width * data.from * 0.01);
 						resized_height = Math.round(img_size.natural_height * data.from * 0.01);
 						$('#resize_width').val(resized_width);
@@ -378,7 +384,7 @@ below is test area
 					},
 				});
 
-			
+
 				$('#resize_apply').click(function() {
 					argv_3p = $('#resize_width').val() +' '+ $('#resize_height').val();
 					$('#toolbox').html('');
@@ -393,7 +399,8 @@ below is test area
 					reloadImg();
 				});
 
-			}else{
+			}
+			else{
 				sendWish(trick,argv_3p);
 			}
 		}
