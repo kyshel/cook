@@ -86,20 +86,21 @@
 	
 	
 	<script type="text/javascript">
-
 		var API_PATH = "../chef/api.php";
 		var IMGS_PATH = "../imgs";
-
 
 		// load image from cookie, if cookie has set
 		if( readCookie('uid') != null){
 			reloadImg();
 			showTricks();
 		}
+	
+		init(); 
 
-		
+		function init(){
+			document.getElementById("inp").addEventListener("change", readFile);
 
-		document.getElementById("inp").addEventListener("change", readFile);
+		}
 
 
 
@@ -456,6 +457,14 @@
 					$('#img').data('Jcrop').destroy();
 					reloadImg();
 				});
+
+				// double click to apply
+				var jcrop_selection = $('.jcrop-selection');
+				if (jcrop_selection.length != 0) {
+					$('.jcrop-selection').dblclick(function(){
+						$('#crop_apply').click();
+					});
+				}
 
 
 			}
