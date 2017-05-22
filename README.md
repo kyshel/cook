@@ -1,7 +1,7 @@
 # Cook
 >Cook images by various tricks.
 
-Cook is an online image process platform.
+Cook is an online image process platform.    
 Core process is driven by OpenCV C++.    
 PHP expose web API for client invoking.    
 An HTML page as greet stage. 

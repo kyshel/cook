@@ -21,5 +21,6 @@ Metainfo when developing.
 - put json is_unparse
 - add upload limit <= 10M
 - js getJson check parse
+- 170518 focus current trick
 
 

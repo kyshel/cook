@@ -3,9 +3,9 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Cook Greet</title>
+	<title>Cook Greet</title>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
@@ -47,13 +47,17 @@
 		<div id="tricks_panel" class="btn-group"></div>
 	</div><br>
 
+	<div id="wrapper_trick_name">
+		<div id="trick_name" ></div>
+	</div><br>
+
 	<div id="wrapper_toolbox">
 		<div id="toolbox"></div>
 	</div><br>
 
 	<div id="wrapper_image" >
 		<div id="img_container">
-		<img id="img" class="_img-thumbnail ">
+			<img id="img" class="_img-thumbnail ">
 		</div>
 	</div><br>
 
@@ -62,9 +66,9 @@
 	
 
 
-<hr>
-below is test area
-<hr>
+	<hr>
+	below is test area
+	<hr>
 
 	<button id="test">test</button>
 
@@ -89,19 +93,15 @@ below is test area
 
 		// load image from cookie, if cookie has set
 		if( readCookie('uid') != null){
-			showImageReady(readCookie('uid'));
+			reloadImg();
 			showTricks();
 		}
 
-		//$('#img').Jcrop({ boxWidth: 200, boxHeight: 200 });
+		
 
 		document.getElementById("inp").addEventListener("change", readFile);
 
-		$('#img').on('load', function(){
-			hideLoader();
-			$(".btn").not(".travel").prop("disabled", false);
-			checkStep();
-		});
+
 
 
 		function readFile() {		
@@ -111,7 +111,7 @@ below is test area
 				var content = '';
 				FR.addEventListener("load", function(e) {
 					document.getElementById("img").src       = e.target.result;
-	
+
 					showLoader('Loaded image, uploading ...');
 					var image = {
 						"origin_name": file_input.files[0].name,
@@ -304,31 +304,50 @@ below is test area
 		}
 
 		function reloadImg(){
+			$(".btn").prop("disabled", true);
+			showLoader('Reloading image...');
+
+
 			step_after=readCookie('step');
 			uid = readCookie('uid');
 			src_ext = readCookie('src_ext');
 
+			$('#img').on('load', function(){
+				hideLoader();
+				reloadPanel();
+				$(".btn").not(".travel").prop("disabled", false);
+				checkStep();
+
+				$('#img').off('load'); // prevent Jcrop intialization trigger this.func
+			});
+
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
+			$("#img").removeAttr('style'); // remove Jcrop style
 			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ;
-
-			$(".btn").not(".travel").prop("disabled", false);
-			checkStep();
 		}
 
 		
 		// wish to deposited image
 		function wish(trick){
+			// initial toolbox and reset img
+			$('#toolbox').html('');
+			// var jcrop_api = $('#img').data('Jcrop');
+			// jcrop_api == undefined ? '' : jcrop_api.destroy();
+
+			// render toolbox & set img
 			argv_3p = '';
 			if (trick == 'resize') {
+				focusTrick(trick);
+
 				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button><button id="resize_cancel">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {
 					'display_width':$('#img')[0].width,
-					 'display_height':$('#img')[0].height,
-					 'natural_width':$('#img')[0].naturalWidth,
-					 'natural_height':$('#img')[0].naturalHeight,
+					'display_height':$('#img')[0].height,
+					'natural_width':$('#img')[0].naturalWidth,
+					'natural_height':$('#img')[0].naturalHeight,
 				} ;
 				$('#resize_width').val(img_size.natural_width);
 				$('#resize_height').val(img_size.natural_height);
@@ -353,16 +372,12 @@ below is test area
 							$('#resize_width').val(Math.round(now_height * aspect_ratio));
 						});
 
-					}else{
+					}
+					else{
 						$('#resize_width').off('input');
 						$('#resize_height').off('input');
 					}
 				});
-
-				
-
-				
-
 
 				$("#resize_slider").ionRangeSlider({
 					min: 1,
@@ -400,12 +415,62 @@ below is test area
 				});
 
 			}
+			else if(trick == 'crop'){
+				focusTrick(trick); 
+
+				box_width = $("#img_container").width();
+				box_height = $("#img_container").height();
+				image_natural_width = $("#img")[0].naturalWidth;
+				image_natural_height = $("#img")[0].naturalHeight;
+
+				html_toolbox = 'Offset-x:<input id="crop_x" type="number" max="" min="" >Offset-y:<input id="crop_y" type="number" max="" min="" >Crop_width:<input id="crop_width" type="number" max="" min="" >Crop_height:<input id="crop_height" type="number" max="" min="" ><button id="crop_apply">Apply</button><button id="crop_cancel">Cancel</button>';
+				$('#toolbox').html(html_toolbox);
+
+
+				$('#img').Jcrop({ 
+					boxWidth: box_width,
+					setSelect:   [  
+					image_natural_width / 4 ,
+					image_natural_height / 4,
+					image_natural_width / 2,
+					image_natural_height / 2 
+					], 
+					onChange: cropShowCoords,
+		
+				});
+
+				
+
+				
+
+				$('#crop_apply').click(function() {
+					argv_3p = $('#crop_x').val() +' '+ $('#crop_y').val()+' '+ $('#crop_width').val()+' '+ $('#crop_height').val();
+					$('#toolbox').html('');
+					$('#img').data('Jcrop').destroy();
+					sendWish(trick,argv_3p);
+		
+				});
+
+				$('#crop_cancel').click(function() {				
+					$('#toolbox').html('');
+					$('#img').data('Jcrop').destroy();
+					reloadImg();
+				});
+
+
+			}
 			else{
 				sendWish(trick,argv_3p);
 			}
 		}
 
 
+		function cropShowCoords(c){
+			$('#crop_x').val(Math.round(c.x));
+			$('#crop_y').val(Math.round(c.y));
+			$('#crop_width').val(Math.round(c.w));
+			$('#crop_height').val(Math.round(c.h));
+		}
 
 
 		// apply
@@ -416,11 +481,11 @@ below is test area
 			var path = API_PATH + "/tricks/" + trick;
 
 			image = {
-					"uid" : readCookie('uid'),
-					"step" : readCookie('step'),
-					"src_ext" : readCookie('src_ext'),
-					"origin_name" : readCookie('origin_name'),
-					"argv_3p" : argv_3p
+				"uid" : readCookie('uid'),
+				"step" : readCookie('step'),
+				"src_ext" : readCookie('src_ext'),
+				"origin_name" : readCookie('origin_name'),
+				"argv_3p" : argv_3p
 			}
 
 
@@ -495,9 +560,18 @@ below is test area
 
 		}
 
-		function showImageReady(image_name){
-			showLoader('Downloading last loaded image ...');
-			reloadImg();
+		function focusTrick(trick){
+			$('#tricks_panel').hide();
+
+			$('#trick_name').html(upFirstLetter(trick) );
+			$('#trick_name').show();
+		}
+
+		function reloadPanel(){
+			$('#tricks_panel').show();
+
+			$('#trick_name').hide();
+			$('#trick_name').html('');
 		}
 
 		function getFile(){

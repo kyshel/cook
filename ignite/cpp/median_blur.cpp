@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 		"{help h usage ? |      | print help   }"
 		"{@src_image     |      | src_image   }"
 		"{@dst_image     |      | dst_image   }"
-		"{s size         |  10  |   kernel size }"
+		"{s size         |  11  |   kernel size }"
 		"{D debug        |      |   0-no, 1-yes }"
 		;
 	CommandLineParser parser(argc, argv, keys);
