@@ -89,15 +89,17 @@
 		var API_PATH = "../chef/api.php";
 		var IMGS_PATH = "../imgs";
 
-		// load image from cookie, if cookie has set
-		if( readCookie('uid') != null){
-			reloadImg();
-			showTricks();
-		}
+
 	
 		init(); 
 
 		function init(){
+			// load image from cookie, if cookie has set
+			if( readCookie('uid') != null){
+				reloadImg();
+				showTricks();
+			}
+
 			document.getElementById("inp").addEventListener("change", readFile);
 
 		}
@@ -325,7 +327,9 @@
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
 			$("#img").removeAttr('style'); // remove Jcrop style
-			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ;
+			
+			// add ?time is unevitable, to prevent cache, though it slow load speed
+			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ; 
 		}
 
 		
@@ -465,6 +469,13 @@
 						$('#crop_apply').click();
 					});
 				}
+
+
+			}
+			else if (trick == 'flip'){
+				focusTrick(trick);
+				html_toolbox = '<button>x</button><button>y</button><button>o</button><button id="flip_apply">Apply</button><button id="flip_cancel" class="trick_cancel">Cancel</button>';
+				$('#toolbox').html(html_toolbox);
 
 
 			}

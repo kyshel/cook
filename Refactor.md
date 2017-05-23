@@ -22,5 +22,7 @@ Metainfo when developing.
 - add upload limit <= 10M
 - js getJson check parse
 - 170518 focus current trick
+- 170523 histogram should be removed from trick list, it should be shown as info
+- add stage 
 
 
