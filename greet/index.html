@@ -317,6 +317,7 @@
 
 			$('#img').on('load', function(){
 				hideLoader();
+				emptyToolbox();
 				reloadPanel();
 				$(".btn").not(".travel").prop("disabled", false);
 				checkStep();
@@ -332,13 +333,15 @@
 			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ; 
 		}
 
+		function emptyToolbox(){
+			$('#toolbox').html('');
+		}
+
 		
 		// wish to deposited image
 		function wish(trick){
 			// initial toolbox and reset img
 			$('#toolbox').html('');
-			// var jcrop_api = $('#img').data('Jcrop');
-			// jcrop_api == undefined ? '' : jcrop_api.destroy();
 
 			// render toolbox & set img
 			argv_3p = '';
@@ -474,14 +477,92 @@
 			}
 			else if (trick == 'flip'){
 				focusTrick(trick);
-				html_toolbox = '<button>x</button><button>y</button><button>o</button><button id="flip_apply">Apply</button><button id="flip_cancel" class="trick_cancel">Cancel</button>';
+
+				html_toolbox = '<button id="flip_x" class="flip_type btn btn-default" value="x">x</button><button id="flip_y" class="flip_type btn btn-default" value="y">y</button><button id="flip_z" class="flip_type btn btn-default" value="z">z</button><button id="flip_reset" value="0" class="btn btn-default">reset</button> <br><button id="flip_apply" class="btn btn-default">Apply</button><button id="flip_cancel" class="trick_cancel btn btn-default">Cancel</button><input id="flip_type_store" style="display:none;">';	
 				$('#toolbox').html(html_toolbox);
+				flipReset();
 
 
+
+				$('.flip_type').click(function() {				
+					flipImg(this.value);	
+					$("#flip_reset").prop("disabled", false);
+					$("#flip_apply").prop("disabled", false);	
+					$('#flip_type_store').val(this.value);
+					console.log($('#flip_type_store').val());
+				});
+
+
+
+				$('#flip_reset').click(function() {				
+					flipReset();
+
+				});
+
+
+				$('#flip_apply').click(function() {				
+					
+					map={
+						'x':0,
+						'y':1,
+						'z':2
+					};
+					argv_3p =map[$('#flip_type_store').val()];
+					sendWish(trick,argv_3p);
+				});
+
+				addCancelListener();
 			}
 			else{
 				sendWish(trick,argv_3p);
 			}
+		}
+
+		function flipReset(){
+			flipImg(0);	
+			$("#flip_reset").prop("disabled", true);
+			$("#flip_apply").prop("disabled", true);	
+		}
+
+		function flipImg(type) {
+			var j = document.getElementById("img");
+			j.style.transitionDuration = "0.5s"
+
+			if (type == 'x') {
+	
+				j.style.transform = "rotateX(180deg)";
+				
+			}else if (type == 'y') {
+
+				j.style.transform = "rotateY(180deg)";
+
+			}else if (type == 'z') {
+				
+				j.style.transform = "rotateZ(180deg)";
+
+			} else if (type == '0') {
+				
+				j.style.transform = "";
+
+			} 
+
+			else {
+				console.log('flipImg has wrong type');
+				return ;
+			}
+	
+		}
+
+		function addCancelListener(){
+			$('.trick_cancel').click(function() {				
+				$('#toolbox').html('');
+
+				if ($('#img').data('Jcrop')) {
+					$('#img').data('Jcrop').destroy();
+				}
+				
+				reloadImg();
+			});
 		}
 
 
@@ -495,7 +576,7 @@
 
 		// apply
 		function sendWish(trick,argv_3p) {	
-
+			$(".btn").prop("disabled", true); 
 			showLoader('Processing...');
 
 			var path = API_PATH + "/tricks/" + trick;
