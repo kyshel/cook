@@ -25,4 +25,7 @@ Metainfo when developing.
 - 170523 histogram should be removed from trick list, it should be shown as info
 - add stage 
 
+## Notice
+- not work in IE
+
 

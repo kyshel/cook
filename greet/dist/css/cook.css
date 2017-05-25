@@ -1,3 +1,33 @@
+body{
+	padding-top: 70px;
+}
+
+#drop_container{
+	border:3px dashed #888;
+	height:100px;
+	padding-top: 20px;
+}
+
+#upload_button{
+	width: 50%;
+	margin: 0 auto;
+}
+
+._file_new{
+	margin: 0 auto;
+	width: 80%;
+    height: 200px;
+
+    padding: 200px 0 0 0;
+    overflow: hidden;
+
+    border: 3px dashed #888;
+
+}
+
+
+
+
 .is-quiet{
 	display: none;
 }
@@ -31,3 +61,6 @@
 	max-width: 100%;
 	height: auto;
 }
+
+/* 170525 upload file input */
+

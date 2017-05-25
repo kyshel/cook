@@ -8,10 +8,9 @@
 	<title>Cook Greet</title>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" >
-	
+
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
 
@@ -33,51 +32,145 @@
 </head>
 <body>
 
-	<div id="loader" class="is-quiet">
-		<br>
-		<div class="loader-spinner"></div>
-		<span id="loader-text"></span>
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="./">Cook</a>
+			</div>
+
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav">
+					<li class="dropdown" id="file_operation" style="display: none;">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">File<span class="caret"></span></a>
+						<ul class="dropdown-menu">
+							<li><a id="new_img"  href="#" >New</a></li>
+							<li><a id="delete_img" href="#">Delete Image</a></li>
+							<li><a id="download_img" href="#">Save Image</a></li>
+							
+						</ul>
+					</li>		
+
+				</ul>
+
+
+
+			</div><!-- /.navbar-collapse -->
+		</div><!-- /.container-fluid -->
+	</nav>
+
+	<div class="container" id="content">
+
+
+		<div id="drop_container" style="display: none;">
+			<div id="upload_button">Drag files to here, or <input id="inp" type="file" /></div>
+		</div>		
+
+		<div id="loader" class="is-quiet">
+			<br>
+			<div class="loader-spinner"></div>
+			<span id="loader-text"></span>
+		</div>
+
+		<div id="work_panel">
+			<div id="wrapper_tricks">
+				<div id="tricks_panel" class="btn-group"></div>
+			</div><br>
+
+			<div id="wrapper_trick_name">
+				<div id="trick_name" ></div>
+			</div><br>
+
+			<div id="wrapper_toolbox">
+				<div id="toolbox"></div>
+			</div><br>
+
+			<div id="wrapper_image" >
+				<div id="img_container">
+					<img id="img" class="_img-thumbnail ">
+				</div>
+			</div><br>
+		</div>
+
 	</div>
 
-	<div id="wrapper_newfile">
-		<input id="inp" type='file'>
-	</div><br>
-
-	<div id="wrapper_tricks">
-		<div id="tricks_panel" class="btn-group"></div>
-	</div><br>
-
-	<div id="wrapper_trick_name">
-		<div id="trick_name" ></div>
-	</div><br>
-
-	<div id="wrapper_toolbox">
-		<div id="toolbox"></div>
-	</div><br>
-
-	<div id="wrapper_image" >
-		<div id="img_container">
-			<img id="img" class="_img-thumbnail ">
-		</div>
-	</div><br>
-
-
-	
-	
-
-
-	<hr>
-	below is test area
-	<hr>
-
-	<button id="test">test</button>
-
-	<input type="text" id="example_id" name="example_name" value="" />
 
 
 
 	
-	
+	<script type="text/javascript">
+		
+
+
+
+
+
+		function triggerDrop(){
+			drop_container.ondragover = drop_container.ondragenter = function(evt) {
+				evt.preventDefault();
+			};
+
+			drop_container.ondrop = function(evt) {		
+				inp.files = evt.dataTransfer.files;
+				evt.preventDefault();
+			};
+
+			var dropTarget = $('#drop_container'),
+			html = $('html'),
+			showDrag = false,
+			timeout = -1;
+
+			dropTarget.bind('dragenter', function () {
+				dropTarget.addClass('dragging');
+				showDrag = true; 
+			});
+			dropTarget.bind('dragover', function(){
+				showDrag = true; 
+			});
+			dropTarget.bind('dragleave', function (e) {
+				showDrag = false; 
+				clearTimeout( timeout );
+				timeout = setTimeout( function(){
+					if( !showDrag ){ dropTarget.removeClass('dragging'); }
+				}, 200 );
+			});
+		}
+
+		function deleteImage(){
+			eraseCookie('origin_name');
+			eraseCookie('uid');
+			eraseCookie('step');
+			eraseCookie('max_step');
+			eraseCookie('src_ext');
+			eraseCookie('undo');
+			createCookie('is_online',0,1);	
+			$('#work_panel').css('display','none');
+			$('#file_operation').css('display','none');
+
+			init();	
+		}
+
+		function getDownloadName(){
+			var origin_name = readCookie('origin_name');
+			var array_origin_name = origin_name.split('.');
+			var ext=array_origin_name[array_origin_name.length-1];	
+			array_origin_name.pop(); // this line alt array_origin_name !
+			var name=array_origin_name.join('');
+			var download_name= name + '_cooked.' +ext;
+
+			return download_name;
+		}
+
+		function test(){}
+
+	</script>
 
 
 
@@ -89,16 +182,35 @@
 		var API_PATH = "../chef/api.php";
 		var IMGS_PATH = "../imgs";
 
-
-	
 		init(); 
+		test();
+		
+
 
 		function init(){
-			// load image from cookie, if cookie has set
-			if( readCookie('uid') != null){
+			if( readCookie('is_online') == '1'){ 
 				reloadImg();
 				showTricks();
+				$('#file_operation').css('display','block');
+
+			}else{ // no image in cookie
+				$('#drop_container').css('display','block');
+				$('#delete_img').prop('disabled',true);
+
 			}
+
+			$('#new_img').click(function() {
+				$('#work_panel').css('display','none');
+				$('#drop_container').css('display','block');
+				triggerDrop(); // reload event after display_none 
+			});
+
+			$('#delete_img').click(function() {
+				deleteImage();
+			});
+
+			triggerDrop();
+
 
 			document.getElementById("inp").addEventListener("change", readFile);
 
@@ -107,7 +219,10 @@
 
 
 
-		function readFile() {		
+		function readFile() {
+			$('#work_panel').css('display','block');
+			$('#drop_container').css('display','none');
+
 			var file_input = document.getElementById("inp")
 			if (file_input.files && file_input.files[0]) {
 				var FR= new FileReader();
@@ -151,6 +266,7 @@
 					eraseCookie('max_step');
 					eraseCookie('src_ext');
 					eraseCookie('undo');
+					eraseCookie('is_online');
 
 					createCookie('origin_name',image.origin_name,1);
 					createCookie('uid',response.uid,1);
@@ -158,11 +274,12 @@
 					createCookie('max_step',response.step,1);
 					createCookie('src_ext',response.src_ext,1);
 					createCookie('undo',0);
-					
+					createCookie('is_online',1,1);
 					
 
 					
 					showTricks();
+					showFileOperation();
 					
 				}else{
 					console.log('deposit status not 201');
@@ -265,7 +382,6 @@
 					redo();
 				});
 
-				
 
 			});
 
@@ -319,6 +435,7 @@
 				hideLoader();
 				emptyToolbox();
 				reloadPanel();
+				
 				$(".btn").not(".travel").prop("disabled", false);
 				checkStep();
 
@@ -329,8 +446,17 @@
 			$("#img").removeAttr('height');
 			$("#img").removeAttr('style'); // remove Jcrop style
 			
+			
+			var img_path=IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext ;
 			// add ?time is unevitable, to prevent cache, though it slow load speed
-			$('#img')[0].src = IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext +'?time='+new Date().getTime() ; 
+			var img_fresh= img_path +'?time='+new Date().getTime();
+			$('#img')[0].src = img_fresh;
+			$('#download_img').prop('href',img_fresh);
+			$('#download_img').prop('download',getDownloadName );
+		}
+
+		function showFileOperation(){
+			$('#file_operation').css('display','block');
 		}
 
 		function emptyToolbox(){
@@ -444,7 +570,7 @@
 					image_natural_height / 2 
 					], 
 					onChange: cropShowCoords,
-		
+
 				});
 
 				
@@ -456,7 +582,7 @@
 					$('#toolbox').html('');
 					$('#img').data('Jcrop').destroy();
 					sendWish(trick,argv_3p);
-		
+
 				});
 
 				$('#crop_cancel').click(function() {				
@@ -529,7 +655,7 @@
 			j.style.transitionDuration = "0.5s"
 
 			if (type == 'x') {
-	
+
 				j.style.transform = "rotateX(180deg)";
 				
 			}else if (type == 'y') {
@@ -550,7 +676,7 @@
 				console.log('flipImg has wrong type');
 				return ;
 			}
-	
+
 		}
 
 		function addCancelListener(){
