@@ -52,7 +52,7 @@
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">File<span class="caret"></span></a>
 						<ul class="dropdown-menu">
 							<li><a id="new_img"  href="#" >New</a></li>
-							<li><a id="delete_img" href="#">Delete Image</a></li>
+							<li><a id="delete_img" href="#" >Delete Image</a></li>
 							<li><a id="download_img" href="#">Save Image</a></li>
 							
 						</ul>
@@ -68,9 +68,22 @@
 
 	<div class="container" id="content">
 
+		<div id="file_div">
+			<input id="inp" type="file" style="display: none;" />
+		</div>
 
 		<div id="drop_container" style="display: none;">
-			<div id="upload_button">Drag files to here, or <input id="inp" type="file" /></div>
+			<div id="upload_tip">
+
+				<svg class="upload_icon" xmlns="http://www.w3.org/2000/svg" width="50" height="43" viewBox="0 0 50 43"><path d="M48.4 26.5c-.9 0-1.7.7-1.7 1.7v11.6h-43.3v-11.6c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v13.2c0 .9.7 1.7 1.7 1.7h46.7c.9 0 1.7-.7 1.7-1.7v-13.2c0-1-.7-1.7-1.7-1.7zm-24.5 6.1c.3.3.8.5 1.2.5.4 0 .9-.2 1.2-.5l10-11.6c.7-.7.7-1.7 0-2.4s-1.7-.7-2.4 0l-7.1 8.3v-25.3c0-.9-.7-1.7-1.7-1.7s-1.7.7-1.7 1.7v25.3l-7.1-8.3c-.7-.7-1.7-.7-2.4 0s-.7 1.7 0 2.4l10 11.6z"></path></svg>
+				<div id="tip_text">
+					<label for="_inp" class="btn btn-default">
+						Choose a file
+					</label> 
+					, or drag it here
+				</div>
+				
+			</div>
 		</div>		
 
 		<div id="loader" class="is-quiet">
@@ -80,23 +93,24 @@
 		</div>
 
 		<div id="work_panel">
-			<div id="wrapper_tricks">
+			<div id="wrapper_tricks" class="wrapper_work">
 				<div id="tricks_panel" class="btn-group"></div>
-			</div><br>
+			</div>
 
-			<div id="wrapper_trick_name">
+			<div id="wrapper_trick_name" class="wrapper_work">
 				<div id="trick_name" ></div>
-			</div><br>
+			</div>
 
-			<div id="wrapper_toolbox">
+			<div id="wrapper_toolbox" class="wrapper_work">
 				<div id="toolbox"></div>
-			</div><br>
+			</div>
 
-			<div id="wrapper_image" >
+			<div id="wrapper_image" class="wrapper_work">
 				<div id="img_container">
 					<img id="img" class="_img-thumbnail ">
 				</div>
-			</div><br>
+			</div>
+
 		</div>
 
 	</div>
@@ -109,9 +123,6 @@
 		
 
 
-
-
-
 		function triggerDrop(){
 			drop_container.ondragover = drop_container.ondragenter = function(evt) {
 				evt.preventDefault();
@@ -122,28 +133,42 @@
 				evt.preventDefault();
 			};
 
-			var dropTarget = $('#drop_container'),
-			html = $('html'),
-			showDrag = false,
-			timeout = -1;
+			file_operation.ondragover = drop_container.ondragenter = function(evt) {
+				evt.preventDefault();
+			};
 
-			dropTarget.bind('dragenter', function () {
-				dropTarget.addClass('dragging');
-				showDrag = true; 
+			file_operation.ondrop = function(evt) {		
+				inp.files = evt.dataTransfer.files;
+				evt.preventDefault();
+			};
+
+			
+
+			var dropTarget = $('#drop_container'),
+			html = $('html');
+
+			[ 'dragover', 'dragenter' ].forEach( function( event ){
+				dropTarget.bind(event, function(){
+					dropTarget.addClass('dragging');
+				});
 			});
-			dropTarget.bind('dragover', function(){
-				showDrag = true; 
+
+			[ 'dragleave', 'dragend', 'drop' ].forEach( function( event )
+			{
+				dropTarget.bind(event, function(){
+					dropTarget.removeClass('dragging');
+				});
 			});
-			dropTarget.bind('dragleave', function (e) {
-				showDrag = false; 
-				clearTimeout( timeout );
-				timeout = setTimeout( function(){
-					if( !showDrag ){ dropTarget.removeClass('dragging'); }
-				}, 200 );
-			});
+
+
 		}
 
 		function deleteImage(){
+			var confirm_del=confirm('Confirm to delete image？');
+			if (confirm_del == false) {
+				return;
+			}
+
 			eraseCookie('origin_name');
 			eraseCookie('uid');
 			eraseCookie('step');
@@ -168,7 +193,20 @@
 			return download_name;
 		}
 
-		function test(){}
+		/* standing by */
+		function confirmWhenCloseTab(){
+			window.onbeforeunload = function (e) {
+				e = e || window.event;
+
+				if (e) {
+					e.returnValue = 'Sure?';
+				}
+
+				return 'Sure?';
+			};
+		}
+
+
 
 	</script>
 
@@ -203,13 +241,19 @@
 				$('#work_panel').css('display','none');
 				$('#drop_container').css('display','block');
 				triggerDrop(); // reload event after display_none 
+				$('#inp').click();
 			});
 
 			$('#delete_img').click(function() {
 				deleteImage();
 			});
 
+			$('#drop_container').click(function() {
+				$('#inp').click();
+			});
+
 			triggerDrop();
+			//confirmWhenCloseTab();
 
 
 			document.getElementById("inp").addEventListener("change", readFile);
@@ -222,6 +266,7 @@
 		function readFile() {
 			$('#work_panel').css('display','block');
 			$('#drop_container').css('display','none');
+			$(".btn").prop("disabled", true);
 
 			var file_input = document.getElementById("inp")
 			if (file_input.files && file_input.files[0]) {
@@ -280,6 +325,7 @@
 					
 					showTricks();
 					showFileOperation();
+					$(".btn").prop("disabled", false);
 					
 				}else{
 					console.log('deposit status not 201');
@@ -444,6 +490,7 @@
 
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
+			$("#img").removeClass('img_resizing');
 			$("#img").removeAttr('style'); // remove Jcrop style
 			
 			
@@ -473,8 +520,9 @@
 			argv_3p = '';
 			if (trick == 'resize') {
 				focusTrick(trick);
+				$("#img").addClass('img_resizing');
 
-				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply">Apply</button><button id="resize_cancel">Cancel</button>';
+				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply" class="btn btn-default">Apply</button><button id="resize_cancel" class="btn btn-default">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {
@@ -557,7 +605,7 @@
 				image_natural_width = $("#img")[0].naturalWidth;
 				image_natural_height = $("#img")[0].naturalHeight;
 
-				html_toolbox = 'Offset-x:<input id="crop_x" type="number" max="" min="" >Offset-y:<input id="crop_y" type="number" max="" min="" >Crop_width:<input id="crop_width" type="number" max="" min="" >Crop_height:<input id="crop_height" type="number" max="" min="" ><button id="crop_apply">Apply</button><button id="crop_cancel">Cancel</button>';
+				html_toolbox = 'Offset-x:<input id="crop_x" type="number" max="'+image_natural_width+'" min="0" disabled>Offset-y:<input id="crop_y" type="number" max="'+image_natural_width+'" min="0" disabled>Crop_width:<input id="crop_width" type="number" max="'+image_natural_width+'" min="0" disabled>Crop_height:<input id="crop_height" type="number" max="'+image_natural_width+'" min="0" disabled><br><button id="crop_apply" class="btn btn-default">Apply</button><button id="crop_cancel" class="btn btn-default">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 
