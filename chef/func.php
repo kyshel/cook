@@ -54,12 +54,14 @@ function process($url_chopped){
 	//http_response_code(201);
 	$input=get_input(); 
 	$uid= $input['uid'];
+	$is_preview=$input['is_preview']; 
 	$pre_step=$input['step'] ; 
-	$now_step=$input['step'] + 1;
+	$now_step= ( $is_preview == 0) ? $input['step'] + 1 : '_preview';
 	$src_ext=$input['src_ext']; 
 	$dst_ext=$input['dst_ext']; 
 	$src_image=ABSPATH.'imgs/'.$uid.'/step'.$pre_step.'.'.$src_ext; 
 	$dst_image=ABSPATH.'imgs/'.$uid.'/step'.$now_step.'.'.$dst_ext; 
+
 
 	$argv_0 = ABSPATH.'ignite/cmake/bin/'.$trick;
 	$argv_1 = $src_image;
@@ -130,6 +132,7 @@ function get_input(){
 
 	$argv_3p=isset($array_input['argv_3p'])?$array_input['argv_3p']:'';
 	$dst_ext=isset($array_input['dst_ext'])?$array_input['dst_ext']:$origin_name_parts['extension'];
+	$is_preview=isset($array_input['is_preview'])?$array_input['is_preview']:0;
 
 	$stored_input=array(
 		'origin_name' => $array_input['origin_name'],  
@@ -141,6 +144,7 @@ function get_input(){
 		'dst_ext' => $dst_ext , 	
 
 		'argv_3p' => $argv_3p , 
+		'is_preview' => $is_preview ,
 		);
 
 	//pre_dump($stored_input);

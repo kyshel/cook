@@ -36,13 +36,13 @@
 		<div class="container">
 			<!-- Brand and toggle get grouped for better mobile display -->
 			<div class="navbar-header">
-				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+				<button id="collapse_button" type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
 					<span class="sr-only">Toggle navigation</span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="./">Cook</a>
+				<a id="site_name" class="navbar-brand" href="./">Cook</a>
 			</div>
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
@@ -133,7 +133,7 @@
 				evt.preventDefault();
 			};
 
-			file_operation.ondragover = drop_container.ondragenter = function(evt) {
+			file_operation.ondragover = file_operation.ondragenter = function(evt) {
 				evt.preventDefault();
 			};
 
@@ -178,8 +178,7 @@
 			createCookie('is_online',0,1);	
 			$('#work_panel').css('display','none');
 			$('#file_operation').css('display','none');
-
-			init();	
+			$('#drop_container').css('display','block');
 		}
 
 		function getDownloadName(){
@@ -206,6 +205,7 @@
 			};
 		}
 
+		function test(){}
 
 
 	</script>
@@ -226,18 +226,16 @@
 
 
 		function init(){
-			if( readCookie('is_online') == '1'){ 
+			if( readCookie('is_online') != '1'){ 
+				$('#drop_container').css('display','block');
+			}else{
 				reloadImg();
 				showTricks();
 				$('#file_operation').css('display','block');
-
-			}else{ // no image in cookie
-				$('#drop_container').css('display','block');
-				$('#delete_img').prop('disabled',true);
-
 			}
 
 			$('#new_img').click(function() {
+				$('#collapse_button').click();
 				$('#work_panel').css('display','none');
 				$('#drop_container').css('display','block');
 				triggerDrop(); // reload event after display_none 
@@ -248,13 +246,10 @@
 				deleteImage();
 			});
 
+			triggerDrop();	
 			$('#drop_container').click(function() {
 				$('#inp').click();
 			});
-
-			triggerDrop();
-			//confirmWhenCloseTab();
-
 
 			document.getElementById("inp").addEventListener("change", readFile);
 
@@ -646,8 +641,6 @@
 						$('#crop_apply').click();
 					});
 				}
-
-
 			}
 			else if (trick == 'flip'){
 				focusTrick(trick);
@@ -687,9 +680,108 @@
 
 				addCancelListener();
 			}
+			else if (trick == 'binarization'){
+				focusTrick(trick);
+				$('#toolbox').html(makeSliderToolbox(trick));
+
+				// argv3 must be odd
+				$('#'+trick+'_slider').ionRangeSlider({
+					min: 1,
+					max: 255,
+					step: 2 ,
+					from: 128,
+					postfix: "",
+					onFinish: function (data) {
+						sendPreview(trick,data.from);
+					},
+				});
+
+				addFocusListener(trick);
+			}
+			else if (trick == 'gaussian_blur') {
+				focusTrick(trick);
+				$('#toolbox').html(makeSliderToolbox(trick));
+
+				// argv3 must be odd
+				$('#'+trick+'_slider').ionRangeSlider({
+					min: 1,
+					max: 21,
+					step: 2 ,
+					from: 9,
+					postfix: "",
+					onFinish: function (data) {
+						sendPreview(trick,data.from);
+					},
+				});
+
+				addFocusListener(trick);
+
+			}
+			else if (trick == 'median_blur') {
+				focusTrick(trick);
+				$('#toolbox').html(makeSliderToolbox(trick));
+
+				// argv3 must be odd
+				$('#'+trick+'_slider').ionRangeSlider({
+					min: 1,
+					max: 21,
+					step: 2 ,
+					from: 9,
+					postfix: "",
+					onFinish: function (data) {
+						sendPreview(trick,data.from);
+					},
+				});
+
+				addFocusListener(trick);
+
+			}
+
+			else if (trick == 'blur') {
+				focusTrick(trick);
+				$('#toolbox').html(makeSliderToolbox(trick));
+
+				$('#'+trick+'_slider').ionRangeSlider({
+					min: 1,
+					max: 20,
+					step: 1 ,
+					from: 9,
+					postfix: "",
+					onFinish: function (data) {
+						sendPreview(trick,data.from);
+					},
+				});
+
+				addFocusListener(trick);
+
+			}
+
+			else if(trick == 'histogram'){
+				focusTrick(trick);
+				html_toolbox = '<button class="trick_cancel btn btn-default">Back</button>';
+				$('#toolbox').html(html_toolbox);
+				addCancelListener();
+				sendPreview(trick,'');
+			}
+
 			else{
 				sendWish(trick,argv_3p);
 			}
+		}
+
+		function addFocusListener(trick){
+			$('#'+trick+'_apply').click(function() {	
+				var argv_3p = $('#'+trick+'_slider').data('ionRangeSlider').result.from;			
+				sendWish(trick,argv_3p);
+			});
+
+			addCancelListener();
+			sendPreview(trick,$('#'+trick+'_slider').data('ionRangeSlider').result.from);
+		}
+
+		function makeSliderToolbox(trick){
+			html_toolbox='<input type="text" id="'+trick+'_slider" name="example_name" value="" /><button id="'+trick+'_apply" class="btn btn-default">Apply</button> <button id="'+trick+'_cancel" class="btn btn-default trick_cancel">Cancel</button>';
+			return html_toolbox;
 		}
 
 		function flipReset(){
@@ -747,6 +839,43 @@
 			$('#crop_height').val(Math.round(c.h));
 		}
 
+		function sendPreview(trick,argv_3p) {	
+			$(".btn").prop("disabled", true); 
+			showLoader('Processing...');
+
+			var path = API_PATH + "/tricks/" + trick;
+
+			image = {
+				"is_preview":1,
+				"uid" : readCookie('uid'),
+				"step" : readCookie('step'),
+				"src_ext" : readCookie('src_ext'),
+				"origin_name" : readCookie('origin_name'),
+				"argv_3p" : argv_3p
+			}
+
+
+			$.ajax({
+				url: path,
+				type: 'PUT',
+				dataType: "json",
+				data: JSON.stringify(image),
+			}).success( function(response,status,xhr) {
+				if (xhr.status == 201) {
+					onPreview(response); 				
+				}else{
+					var message = 'wish() status code wrong!';
+					showLoader(message);
+					console.log(message);
+				}
+			}).error( function(e) {
+				console.log('wish() eroor occured');
+				console.log(e);
+			});
+		}
+
+
+
 
 		// apply
 		function sendWish(trick,argv_3p) {	
@@ -783,7 +912,37 @@
 			});
 		}
 
+		function onPreview(response){
+			showLoader('Downloading processed image...');
 
+			$(".btn").prop("disabled", true);
+			showLoader('Reloading image...');
+
+			step_after='_preview';
+			uid = response.image.uid;
+			src_ext = readCookie('src_ext');
+
+			$('#img').on('load', function(){
+				hideLoader();
+				
+				$(".btn").not(".travel").prop("disabled", false);
+				checkStep();
+
+				$('#img').off('load'); // prevent Jcrop intialization trigger this.func
+			});
+
+			$("#img").removeAttr('width');
+			$("#img").removeAttr('height');
+			$("#img").removeClass('img_resizing');
+			$("#img").removeAttr('style'); // remove Jcrop style
+			
+			
+			var img_path=IMGS_PATH +'/' +uid +'/step' +step_after+'.'+src_ext ;
+			// add ?time is unevitable, to prevent cache, though it slow load speed
+			var img_fresh= img_path +'?time='+new Date().getTime();
+			$('#img')[0].src = img_fresh;
+			
+		}
 
 
 
@@ -830,9 +989,6 @@
 
 			showLoader('Downloading processed image...');
 			reloadImg();
-
-			
-
 		}
 
 		function focusTrick(trick){

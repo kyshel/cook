@@ -1,6 +1,6 @@
 {
 	"tricks_classify":{
-		"basic":["resize","crop"]
+		"basic":["resize","crop","flip"]
 		
 	},
 	"resize_max_limit":10000

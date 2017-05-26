@@ -13,13 +13,13 @@ int main(int argc, char** argv)
 		"{help h usage ? |      | print help   }"
 		"{@src_image     |      | src_image   }"
 		"{@dst_image     |      | dst_image   }"
-		"{s size         | 50 |   kernel size }"
+		"{@size         | 50 |   kernel size }"
 		"{D debug        |   |   0-no, 1-yes }"
 		;
 	CommandLineParser parser(argc, argv, keys);
 	String src_path = parser.get<String>(0);
 	String dst_path = parser.get<String>(1);
-	int kernel_size = parser.get<int>("size");
+	int kernel_size = parser.get<int>(2);
 	bool is_debug = parser.has("debug") ? true : false ;
 	if (parser.has("help"))
 	{

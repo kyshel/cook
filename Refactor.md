@@ -24,8 +24,17 @@ Metainfo when developing.
 - 170518 focus current trick
 - 170523 histogram should be removed from trick list, it should be shown as info
 - add stage 
+- 170526 resize add max limit
 
 ## Notice
 - not work in IE
+
+## Bug
+- 170526 after delete, upload will pop twice | 170526 fixed
+
+
+## Bug that will not fix
+- binarazition will
+
 
 
