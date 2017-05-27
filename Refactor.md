@@ -25,9 +25,12 @@ Metainfo when developing.
 - 170523 histogram should be removed from trick list, it should be shown as info
 - add stage 
 - 170526 resize add max limit
+- add sample pic
+- js local image to base64
 
 ## Notice
 - not work in IE
+- 170527 add options, by cookie
 
 ## Bug
 - 170526 after delete, upload will pop twice | 170526 fixed

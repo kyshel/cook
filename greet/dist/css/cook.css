@@ -14,6 +14,9 @@ body{
     margin-bottom: 40px;
 }
 
+#upload_tip:hover .upload_icon,.upload_tip_hovered .upload_icon{
+	fill: #5cb85c !important;
+}
 
 
 .dragging{
@@ -30,6 +33,12 @@ body{
 
 	-webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
     transition: outline-offset .15s ease-in-out, background-color .15s linear;
+}
+
+
+
+a: hover { 
+    background-color: yellow;
 }
 
 #upload_tip{
@@ -108,3 +117,15 @@ body{
 	margin-top: 20px;
 }
 
+/* 170527 */
+
+#img_size {
+    font-size: 11px;
+    position: absolute;
+    z-index: 1;
+    padding: 3px;
+    background: rgba(255,255,255,.5);
+    top: 0;
+    left: 50%;
+    transform: translate(-50%);
+}
