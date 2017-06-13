@@ -130,8 +130,23 @@
 				evt.preventDefault();
 			};
 
-			drop_container.ondrop = function(evt) {		
-				inp.files = evt.dataTransfer.files;
+			drop_container.ondrop = function(evt) {	
+				// console.log(evt.dataTransfer.files);
+				// console.log(evt.dataTransfer.files.length);	
+				// console.log(evt.dataTransfer.getData('url'));
+
+				if (evt.dataTransfer.files.length == 0) {
+					if (evt.dataTransfer.getData('url') != '') {
+						//console.log('remote detected');
+						showLoader('Reading image ...');
+						$('#drop_container').css('display','none');
+						read_url(evt.dataTransfer.getData('url'));
+					}
+				}else{
+					inp.files = evt.dataTransfer.files;
+				}	
+
+				
 				evt.preventDefault();
 			};
 
@@ -287,8 +302,16 @@
 
 		}
 
+		function read_url(url){
+			var image = {
+				'origin_name': 'remote.jpg',
+				'remote_url':url
+			};
+			deposit(image);
+		}
+
 		function test(){
-			
+
 		}
 
 
@@ -380,7 +403,7 @@
 					createCookie('step',response.step,1);
 					createCookie('max_step',response.step,1);
 					createCookie('src_ext',response.src_ext,1);
-					createCookie('undo',0);
+					createCookie('undo',0,1);
 					createCookie('is_online',1,1);
 					
 
@@ -596,7 +619,7 @@
 				focusTrick(trick);
 				$("#img").addClass('img_resizing');
 
-				html_toolbox='Width: <input id="resize_width" type="number"> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply" class="btn btn-default">Apply</button><button id="resize_cancel" class="btn btn-default">Cancel</button>';
+				html_toolbox='Width: <input id="resize_width" type="number"><br> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply" class="btn btn-default">Apply</button><button id="resize_cancel" class="btn btn-default">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {

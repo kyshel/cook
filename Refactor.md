@@ -27,6 +27,7 @@ Metainfo when developing.
 - 170526 resize add max limit
 - add sample pic
 - js local image to base64
+- 170528 PUT data is empty
 
 ## Notice
 - not work in IE

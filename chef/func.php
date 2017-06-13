@@ -8,8 +8,7 @@ function router($request_method,$path_info){
 		'/^\/tricks$/' => 'get_valid_tricks',
 		'/^\/?$/' => 'api_index',
 
-		'/^\/deposit/' => 'api_deposit', // reponse a cooklie 
-		'/^\/deposited/' => 'api_deposited', // reponse a cooklie 
+		'/^\/deposit/' => 'api_deposit', 
 
 		);
 
@@ -118,17 +117,27 @@ function get_input(){
 		$uid = $array_input['uid'];
 		$step = $array_input['step'];
 		$src_ext = $array_input['src_ext'];
-	}else{ // deposit before trick
+	}else{ // deposit
 		$uid = get_uid();
-		$ext = $origin_name_parts['extension']; // deposit_tmp_ext
+		$ext = $origin_name_parts['extension']; 
 		$step = 0;
 		$unique_path = ABSPATH.'imgs/'.$uid;
 		$file_path = ABSPATH.'imgs/'.$uid.'/step'.$step.'.'.$ext;
 		mkdir($unique_path , 0700);
-		base64_to_jpeg($array_input['content'], $file_path);
-		// (refactor) if last code write ok, then 
+
+		if(isset($array_input['remote_url'])){ 
+			$remote_image = file_get_contents($array_input['remote_url'],NULL,NULL,NULL,1024*10);
+			file_put_contents($file_path, $remote_image);
+		}
+		else{ 
+			base64_to_jpeg($array_input['content'], $file_path);
+		}
+			// (refactor) if last code write ok, then 
 		http_response_code(201);
-	}
+
+	} 
+
+
 
 	$argv_3p=isset($array_input['argv_3p'])?$array_input['argv_3p']:'';
 	$dst_ext=isset($array_input['dst_ext'])?$array_input['dst_ext']:$origin_name_parts['extension'];
@@ -189,7 +198,7 @@ function api_index(){
 	$valid_api =  array(
 		'/tricks' => 'list all tricks', 
 		'/tricks/:trick' => 'ignite image by the trick', 
-		'/deposit' => 'deposit image to fridge & stored in SESSION, for future use', 
+		'/deposit' => 'deposit image', 
 		);
 	$data = array(
 		'message' => 'this is cook api index', 
