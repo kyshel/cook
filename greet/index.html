@@ -27,7 +27,9 @@
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
 
 	<link rel="stylesheet" type="text/css" href="./dist/css/bootstrap-switch.min.css" >
+
 	<script src="./dist/js/bootstrap-switch.min.js"></script>
+	<script src="./dist/js/showdown.min.js"></script>
 
 
 
@@ -68,7 +70,7 @@
 						<a href="#" data-toggle="modal" data-target=".modal-settings">Settings</a>	
 					</li>
 					<li>
-						<a href="#" data-toggle=".modal-about" data-target="#">About</a>
+						<a href="#" id="btn_about" data-toggle="modal" data-target=".modal-about">About</a>
 					</li>
 										
 				</ul>
@@ -141,7 +143,7 @@
 
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="myModalLabel">Modal title</h4>
+					<h4 class="modal-title" id="myModalLabel">Settings</h4>
 				</div>
 				<div class="modal-body">
 				<table id="config_table" class="table-hover">
@@ -167,6 +169,25 @@
 		</div>
 	</div>
 
+	<div class="modal fade modal-about" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">About</h4>
+				</div>
+				<div class="modal-body">
+					<div id="about_content" class="markdown-body"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
 	
 
 
@@ -175,11 +196,33 @@
 	
 	<script type="text/javascript">
 
+		function showAbout(file)
+		{
+			var rawFile = new XMLHttpRequest();
+			rawFile.open("GET", file, false);
+			rawFile.onreadystatechange = function ()
+			{
+				if(rawFile.readyState === 4)
+				{
+					if(rawFile.status === 200 || rawFile.status == 0)
+					{
+						var allText = rawFile.responseText;
+
+						var converter = new showdown.Converter(),
+						text      = allText,
+						html      = converter.makeHtml(text);
+						document.getElementById('about_content').innerHTML=html;
+					}
+				}
+			}
+			rawFile.send(null);
+		}
+
 		function loadConfig(){
 			var config_data;
 			if (!(readCookie("config"))){
 				config_data = {
-					display_zoomer:0,
+					display_zoomer:1,
 					display_imgsize:1,
 
 				};
@@ -191,7 +234,13 @@
 			var map_digit_display={
 				0:'none',
 				1:'block',
-			}
+			},
+			map_digit_bool={0:false,1:true};
+
+			$('#switch-zoomer').bootstrapSwitch('state', map_digit_bool[config_data.display_zoomer]);
+			$('#switch-imgsize').bootstrapSwitch('state', map_digit_bool[config_data.display_imgsize]);
+
+
 
 			$('#wrapper_zoomer').css('display',map_digit_display[config_data.display_zoomer]);
 			$('#img_size').css('display',map_digit_display[config_data.display_imgsize]);	
@@ -413,6 +462,12 @@
 				saveConfig();
 				loadConfig();
 			});
+
+			$('#btn_about').click(function() {
+				showAbout("../README.md");
+			});
+
+			
 
 
 		}
