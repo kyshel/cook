@@ -26,6 +26,9 @@
 
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
 
+	<link rel="stylesheet" type="text/css" href="./dist/css/bootstrap-switch.min.css" >
+	<script src="./dist/js/bootstrap-switch.min.js"></script>
+
 
 
 	
@@ -58,6 +61,16 @@
 						</ul>
 					</li>	
 					
+				</ul>
+
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+						<a href="#" data-toggle="modal" data-target=".modal-settings">Settings</a>	
+					</li>
+					<li>
+						<a href="#" data-toggle=".modal-about" data-target="#">About</a>
+					</li>
+										
 				</ul>
 
 
@@ -113,17 +126,97 @@
 				</div>
 			</div>
 
+			<div id="wrapper_zoomer" data-toggle="tooltip" data-placement="left" title="Image Display Width">
+				<input id="zoomer" type="" name="">
+			</div>
+
 		</div>
 
 	</div>
+
+
+	<div class="modal fade modal-settings" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">Modal title</h4>
+				</div>
+				<div class="modal-body">
+				<table id="config_table" class="table-hover">
+					<tr>
+						<td>Display zoomer &nbsp;</td>
+						<td><input id="switch-zoomer" data-size="small" type="checkbox" name="my-checkbox" checked></td>
+					</tr>
+					<tr>
+						<td>Display image size &nbsp;</td>
+						<td><input id="switch-imgsize" data-size="small" type="checkbox" name="my-checkbox" checked></td>
+					</tr>
+					
+				</table>
+
+					
+				</div>
+				<div class="modal-footer">
+					<button id="btn_save_config" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
+					<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				</div>
+
+			</div>
+		</div>
+	</div>
+
+	
 
 
 
 
 	
 	<script type="text/javascript">
-		
 
+		function loadConfig(){
+			var config_data;
+			if (!(readCookie("config"))){
+				config_data = {
+					display_zoomer:0,
+					display_imgsize:1,
+
+				};
+				createCookie("config", JSON.stringify(config_data));
+			}
+
+			config_data=JSON.parse(readCookie("config"));
+			
+			var map_digit_display={
+				0:'none',
+				1:'block',
+			}
+
+			$('#wrapper_zoomer').css('display',map_digit_display[config_data.display_zoomer]);
+			$('#img_size').css('display',map_digit_display[config_data.display_imgsize]);	
+		}
+
+		function saveConfig(){
+			config_data=JSON.parse(readCookie("config"));
+			config_data.display_zoomer=($('#switch-zoomer').bootstrapSwitch('state'))?1:0;
+			config_data.display_imgsize=($('#switch-imgsize').bootstrapSwitch('state'))?1:0;
+			createCookie("config", JSON.stringify(config_data));
+		}
+
+		function triggerPlugin(){
+			$('#switch-zoomer').bootstrapSwitch();
+			$('#switch-imgsize').bootstrapSwitch();
+
+			$('#switch-zoomer').on('switchChange.bootstrapSwitch', function(event, state) {
+				console.log($('#switch-zoomer').bootstrapSwitch('state'));
+				$('#switch-zoomer').bootstrapSwitch('state');
+				// console.log(this); 
+				// console.log(event); 
+				// console.log(state); 
+			});
+
+		}
 
 		function addDragListener(){
 			drop_container.ondragover = drop_container.ondragenter = function(evt) {
@@ -154,20 +247,32 @@
 				evt.preventDefault();
 			};
 
-			file_operation.ondrop = function(evt) {		
-				inp.files = evt.dataTransfer.files;
+			file_operation.ondrop = function(evt) {	
+				if (evt.dataTransfer.files.length == 0) {
+					if (evt.dataTransfer.getData('url') != '') {
+						showLoader('Reading image ...');
+						$('#drop_container').css('display','none');
+						read_url(evt.dataTransfer.getData('url'));
+					}
+				}else{
+					inp.files = evt.dataTransfer.files;
+				}	
 				evt.preventDefault();
 			};
 
 			
 
 			var dropTarget = $('#drop_container'),
-			html = $('html');
+			html = $('html')
+			file_menu = $('#file_operation');
 
 			[ 'dragover', 'dragenter' ].forEach( function( event ){
 				dropTarget.bind(event, function(){
 					dropTarget.addClass('dragging');
 					$("#upload_tip").addClass("upload_tip_hovered");
+				});
+				file_menu.bind(event, function(){
+					file_menu.addClass('file_menu_drag_over');
 				});
 			});
 
@@ -176,6 +281,9 @@
 				dropTarget.bind(event, function(){
 					dropTarget.removeClass('dragging');
 					$("#upload_tip").removeClass("upload_tip_hovered");
+				});
+				file_menu.bind(event, function(){
+					file_menu.removeClass('file_menu_drag_over');
 				});
 			});
 
@@ -198,9 +306,9 @@
 
 			document.getElementById("inp").value = ""; // prevent #inp.change not trigger
 
-			$('#work_panel').css('display','none');
-			$('#file_operation').css('display','none');
-			$('#drop_container').css('display','block');
+			reloadUI();
+
+
 		}
 
 		function getDownloadName(){
@@ -261,6 +369,7 @@
 		}
 
 		function reloadUI(){
+			hideLoader();
 			if( readCookie('is_online') == '1'){ 
 				$('#file_operation').css('display','block');
 				$('#drop_container').css('display','none');
@@ -300,6 +409,41 @@
 				deleteImage();
 			});
 
+			$('#btn_save_config').click(function() {
+				saveConfig();
+				loadConfig();
+			});
+
+
+		}
+
+		function addZoomer(){
+			$('#img_container').css({
+				"width":readCookie('img_display_width')+"px"
+			});
+			var img_size = {
+				'display_width':$('#img')[0].width,
+				'display_height':$('#img')[0].height,
+				'natural_width':$('#img')[0].naturalWidth,
+				'natural_height':$('#img')[0].naturalHeight,
+			} ;
+			zoom_max_width = img_size.natural_width;
+			var slider = $("#zoomer").data("ionRangeSlider");
+			if (slider) {slider.destroy();}
+			$("#zoomer").ionRangeSlider({
+				min: 1,
+				max: zoom_max_width,
+				from: img_size.display_width,
+				postfix: "px",
+				onChange: function (data) {
+					$('#img_container').css({
+						"width":data.from+"px"
+					});
+				},
+				onFinish: function (data) {
+					createCookie('img_display_width',data.from);
+				},
+			});
 		}
 
 		function read_url(url){
@@ -326,6 +470,7 @@
 	<script type="text/javascript">
 		var API_PATH = "../chef/api.php";
 		var IMGS_PATH = "../imgs";
+		var IMG_DISPLAY_MAXWIDTH = 300;
 
 		init(); 
 		test();
@@ -338,8 +483,11 @@
 				showTricks();
 			}
 
+			loadConfig();
 			addGlobalListener();
+			triggerPlugin();
 			reloadUI();
+
 
 			document.getElementById("inp").addEventListener("change", readFile);
 
@@ -397,6 +545,7 @@
 					eraseCookie('src_ext');
 					eraseCookie('undo');
 					eraseCookie('is_online');
+					eraseCookie('img_display_width');
 
 					createCookie('origin_name',image.origin_name,1);
 					createCookie('uid',response.uid,1);
@@ -405,6 +554,7 @@
 					createCookie('src_ext',response.src_ext,1);
 					createCookie('undo',0,1);
 					createCookie('is_online',1,1);
+					createCookie('img_display_width',IMG_DISPLAY_MAXWIDTH);
 					
 
 					
@@ -574,6 +724,7 @@
 
 			$('#img').on('load', function(){
 				addImgSize();
+				addZoomer();
 
 				hideLoader();
 				emptyToolbox();
@@ -587,7 +738,7 @@
 
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
-			$("#img").removeClass('img_resizing');
+			$("#img").removeClass('img_processing img_resizing');
 			$("#img").removeAttr('style'); // remove Jcrop style
 			
 			
@@ -943,6 +1094,7 @@
 
 		function sendPreview(trick,argv_3p) {	
 			$(".btn").prop("disabled", true); 
+			$('#img').addClass('img_processing'); 
 			showLoader('Processing...');
 
 			var path = API_PATH + "/tricks/" + trick;
@@ -981,7 +1133,8 @@
 
 		// apply
 		function sendWish(trick,argv_3p) {	
-			$(".btn").prop("disabled", true); 
+			$(".btn").prop("disabled", true);
+			$('#img').addClass('img_processing'); 
 			showLoader('Processing...');
 
 			var path = API_PATH + "/tricks/" + trick;
@@ -1035,7 +1188,7 @@
 
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
-			$("#img").removeClass('img_resizing');
+			$("#img").removeClass('img_processing img_resizing');
 			$("#img").removeAttr('style'); // remove Jcrop style
 			
 			

@@ -1,6 +1,9 @@
 # Refactor Info
 Metainfo when developing.
 
+## FINISHED
+- zoomer
+
 ## Philosopy
 - api.php is just a data bridge, is pass data, maybe turncate or conjugate, but never alter it
 

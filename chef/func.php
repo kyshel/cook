@@ -126,7 +126,7 @@ function get_input(){
 		mkdir($unique_path , 0700);
 
 		if(isset($array_input['remote_url'])){ 
-			$remote_image = file_get_contents($array_input['remote_url'],NULL,NULL,NULL,1024*10);
+			$remote_image = file_get_contents($array_input['remote_url'],NULL,NULL,NULL,REMOTE_IMAGE_MAXSIZE);
 			file_put_contents($file_path, $remote_image);
 		}
 		else{ 
