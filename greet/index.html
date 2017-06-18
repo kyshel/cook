@@ -7,27 +7,18 @@
 
 	<title>Cook Greet</title>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" ></script>
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" >
-
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.5.4/bootstrap-slider.min.js"></script>
-
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
-
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/css/Jcrop.css" >
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-jcrop/2.0.4/js/Jcrop.min.js"></script>
-
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.min.css" >
-	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/css/ion.rangeSlider.skinNice.min.css" >
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.1.7/js/ion.rangeSlider.min.js"></script>
-
+	<link rel="stylesheet" type="text/css" href="./dist/css/Jcrop.css" >
+	<link rel="stylesheet" type="text/css" href="./dist/css/ion.rangeSlider.min.css" >
+	<link rel="stylesheet" type="text/css" href="./dist/css/ion.rangeSlider.skinNice.min.css" >
+	<link rel="stylesheet" type="text/css" href="./dist/css/bootstrap.min.css" >
 	<link rel="stylesheet" type="text/css" href="./dist/css/cook.css" >
-
 	<link rel="stylesheet" type="text/css" href="./dist/css/bootstrap-switch.min.css" >
 
+	<script src="./dist/js/jquery.min.js"></script>
+	<script src="./dist/js/bootstrap.min.js" ></script>
+	<script src="./dist/js/bootstrap-slider.min.js"></script>
+	<script src="./dist/js/Jcrop.min.js"></script>
+	<script src="./dist/js/ion.rangeSlider.min.js"></script>
 	<script src="./dist/js/bootstrap-switch.min.js"></script>
 	<script src="./dist/js/showdown.min.js"></script>
 
@@ -292,14 +283,16 @@
 				evt.preventDefault();
 			};
 
-			file_operation.ondragover = file_operation.ondragenter = function(evt) {
+			site_name.ondragover = site_name.ondragenter = function(evt) {
 				evt.preventDefault();
 			};
 
-			file_operation.ondrop = function(evt) {	
+			site_name.ondrop = function(evt) {	
 				if (evt.dataTransfer.files.length == 0) {
 					if (evt.dataTransfer.getData('url') != '') {
 						showLoader('Reading image ...');
+						if ($("#img")) {$("#img").addClass('img_processing');}
+						
 						$('#drop_container').css('display','none');
 						read_url(evt.dataTransfer.getData('url'));
 					}
@@ -313,15 +306,15 @@
 
 			var dropTarget = $('#drop_container'),
 			html = $('html')
-			file_menu = $('#file_operation');
+			div_sitename = $('#site_name');
 
 			[ 'dragover', 'dragenter' ].forEach( function( event ){
 				dropTarget.bind(event, function(){
 					dropTarget.addClass('dragging');
 					$("#upload_tip").addClass("upload_tip_hovered");
 				});
-				file_menu.bind(event, function(){
-					file_menu.addClass('file_menu_drag_over');
+				div_sitename.bind(event, function(){
+					div_sitename.addClass('div_sitename_drag_over');
 				});
 			});
 
@@ -331,8 +324,8 @@
 					dropTarget.removeClass('dragging');
 					$("#upload_tip").removeClass("upload_tip_hovered");
 				});
-				file_menu.bind(event, function(){
-					file_menu.removeClass('file_menu_drag_over');
+				div_sitename.bind(event, function(){
+					div_sitename.removeClass('div_sitename_drag_over');
 				});
 			});
 
@@ -555,6 +548,7 @@
 			$('#work_panel').css('display','block');
 			$('#drop_container').css('display','none');
 			$(".btn").prop("disabled", true);
+			$("#img").addClass('img_processing');
 
 			var file_input = document.getElementById("inp")
 			if (file_input.files && file_input.files[0]) {
@@ -771,6 +765,7 @@
 		function reloadImg(){
 			$(".btn").prop("disabled", true);
 			showLoader('Reloading image...');
+			$("#img").addClass('img_processing');
 
 
 			step_after=readCookie('step');
@@ -789,11 +784,11 @@
 				checkStep();
 
 				$('#img').off('load'); // prevent Jcrop intialization trigger this.func
+				$("#img").removeClass('img_processing img_resizing');
 			});
 
 			$("#img").removeAttr('width');
 			$("#img").removeAttr('height');
-			$("#img").removeClass('img_processing img_resizing');
 			$("#img").removeAttr('style'); // remove Jcrop style
 			
 			
@@ -825,7 +820,7 @@
 				focusTrick(trick);
 				$("#img").addClass('img_resizing');
 
-				html_toolbox='Width: <input id="resize_width" type="number"><br> Height: <input id="resize_height" type="number"> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply" class="btn btn-default">Apply</button><button id="resize_cancel" class="btn btn-default">Cancel</button>';
+				html_toolbox='Width: <input id="resize_width" type="number"><br> Height: <input id="resize_height" type="number"><br> <label>Lock Aspect Ratio<input id="aspect_lock" type="checkbox" ></label>	<input type="text" id="resize_slider" name="example_name" value="" /><button id="resize_apply" class="btn btn-default">Apply</button><button id="resize_cancel" class="btn btn-default">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 				var img_size = {
@@ -908,7 +903,7 @@
 				image_natural_width = $("#img")[0].naturalWidth;
 				image_natural_height = $("#img")[0].naturalHeight;
 
-				html_toolbox = 'Offset-x:<input id="crop_x" type="number" max="'+image_natural_width+'" min="0" disabled>Offset-y:<input id="crop_y" type="number" max="'+image_natural_width+'" min="0" disabled>Crop_width:<input id="crop_width" type="number" max="'+image_natural_width+'" min="0" disabled>Crop_height:<input id="crop_height" type="number" max="'+image_natural_width+'" min="0" disabled><br><button id="crop_apply" class="btn btn-default">Apply</button><button id="crop_cancel" class="btn btn-default">Cancel</button>';
+				html_toolbox = 'Offset-x:<input id="crop_x" type="number" max="'+image_natural_width+'" min="0" disabled>Offset-y:<input id="crop_y" type="number" max="'+image_natural_width+'" min="0" disabled><br>Crop_width:<input id="crop_width" type="number" max="'+image_natural_width+'" min="0" disabled>Crop_height:<input id="crop_height" type="number" max="'+image_natural_width+'" min="0" disabled><br><button id="crop_apply" class="btn btn-default">Apply</button> <button id="crop_cancel" class="btn btn-default">Cancel</button>';
 				$('#toolbox').html(html_toolbox);
 
 
