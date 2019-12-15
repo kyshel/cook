@@ -13,7 +13,7 @@ An HTML page as greet stage.
 
 ## Install
 Deploy from a minimal CentOS7 installation 
-1. [Install OpenCV 3.2](http://kyshel.me/2017/04/27/install-opencv3.2-on-centos7/)
+1. [Install OpenCV 3.2](http://kyshel.com/2017/04/27/install-opencv3.2-on-centos7/)
 1. `yum install httpd php`
 1. `chkconfig httpd on && service httpd start`
 1. `firewall-cmd --permanent --zone=public --add-service=http && firewall-cmd --reload`
